@@ -1,0 +1,38 @@
+{
+  "name"        : "wizio-stm",
+  "title"       : "WizIO - STM32",
+  "description" : "Development Platform for STM32",
+  "homepage"    : "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html",
+  "license"     : "Apache-2.0",
+  "engines"     : { "platformio": "^5" },
+  "repository"  : {
+    "type" : "git",
+    "url"  : "https://github.com/Wiz-IO/wizio-stm"
+  },
+  "version": "1.0.0",
+  "packageRepositories" : [ "http://dl.platformio.org/packages/manifest.json" ],
+  "frameworks": {
+      "WizIO-STM32-SDK" : {
+        "package"       : "framework-wizio-stm",
+        "script"        : "builder/frameworks/build-sdk.py",
+        "description"   : "Baremetal STM32",
+        "title"         : "WizIO STM32 SDK"
+      }
+  },
+  "packages": {
+    "framework-wizio-stm": {
+        "type"          : "framework",
+        "version"       : "1.0.0",        
+        "F-version"     : "file://F:/framework-wizio-stm",
+        "U-version"     : "https://github.com/Wiz-IO/framework-wizio-stm.git",
+        "url-sdk"       : "https://github.com/TODO"
+    },
+    "toolchain-gccarmnoneeabi": {
+        "owner"         : "platformio",
+        "type"          : "toolchain",
+        "version"       : "~1.90201.0"
+    }
+
+  }
+  
+}
