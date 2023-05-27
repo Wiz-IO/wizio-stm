@@ -40,14 +40,14 @@ def dev_uploader(target, source, env): # TODO
 
 def dev_get_value(env, name, default):
     return env.GetProjectOption('custom_%s' % name, # ini user config
-           env.BoardConfig().get('build.%s' % name, default) ) # default from board
+           env.BoardConfig().get('build.%s' % name, default) ) # from board
 
 def dev_init_compiler(env, application_name = 'APPLICATION'):
     env.DIV = env.BoardConfig().get('build.div', 'ERROR')
     env.SUB = env.BoardConfig().get('build.sub', 'ERROR')
     env.MCU = env.BoardConfig().get('build.mcu', 'ERROR')
     env.COR = env.BoardConfig().get('build.cor', 'ERROR')
-
+    # check ERROR ?
     env.SUB = env.SUB.replace("%", env.DIV)
     env.MCU = env.MCU.replace("%", env.DIV)    
     
@@ -58,6 +58,10 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
 
     env.optimization = dev_get_value(env, 'optimization', '-Os') # INIDOC
     print('OPTIMIZATION  : %s' % env.optimization)
+
+    linker = dev_get_value(env, 'linker', 'DEFAULT') # INIDOC
+    if 'DEFAULT' == linker: linker = join('$PROJECT_DIR', 'stm' , env.MCU + '_FLASH.ld')
+    print('LINKER        : %s' % linker )  
 
     env.Replace( 
         SIZETOOL = 'arm-none-eabi-size',
@@ -113,7 +117,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
             join('$PROJECT_DIR', 'lib'), 
         ],
         LIBS = [
-            'm', 'c' #, 'gcc'
+            'm', 'c',
         ], 
         LINKFLAGS = [ env.COR, env.optimization,
             '-lnosys',
@@ -123,9 +127,9 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
             '-Wl,--gc-sections',
             '--entry=Reset_Handler',
         ],    
-        LDSCRIPT_PATH = join('$PROJECT_DIR', 'stm' , env.MCU + '_FLASH.ld'), 
+        LDSCRIPT_PATH = linker, 
         UPLOADCMD = dev_uploader,
-        # BUILDERS TODO HEX & BIN  
+        # BUILDERS: TODO HEX & BIN  
     )
 
 dev_init_compiler(env)

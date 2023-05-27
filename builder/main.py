@@ -30,7 +30,22 @@ PLATFORM_NAME  = 'wizio-stm'
 FRAMEWORK_NAME = 'framework-' + PLATFORM_NAME
 
 env = DefaultEnvironment()
-print( Fore.GREEN + '<<<<<<<<<<<< '+env.BoardConfig().get("name").upper()+" 2018 Georgi Angelov >>>>>>>>>>>>" )
+
+def cubemx_config(*args, **kwargs): # TODO
+   print("TODO !!!")
+   if exists( env.subst( join("$PROJECT_DIR", "Inc") ) ):
+      print("Inc exists")
+      # MOVE ALL TO INCLUDE & DELETE
+   if exists( env.subst( join("$PROJECT_DIR", "Src") ) ): # case sensitive !?!
+      print("Src exists")      
+   exit(0)
+env.AddCustomTarget(
+    "config_from_cubemx", None, cubemx_config,
+    title="Config Project from CubeMX",
+    description="blah",
+)
+
+print( '\n<<< STM32 EXPERIMENTAL PLATFORM 2023 Georgi Angelov >>>\n' )
 env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )
 env['FRAMEWORK_DIR'] = env.framework_dir = env.PioPlatform().get_package_dir( FRAMEWORK_NAME )
 env.Replace( 
