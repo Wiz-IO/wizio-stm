@@ -1,1 +1,2 @@
-#  STM32 EXPERIMENTAL PLATFORM 2023 WizIO ( Georgi Angelov )
+#  STM32 EXPERIMENTAL PLATFORM 
+## 2023 WizIO ( Georgi Angelov )
