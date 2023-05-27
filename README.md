@@ -1,2 +1,1 @@
-# wizio-stm
-STM32 PlatformIO Experiment ( Don`t install )
+# <<< STM32 EXPERIMENTAL PLATFORM 2023 Georgi Angelov >>>
