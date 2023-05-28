@@ -39,23 +39,21 @@ def dev_uploader(target, source, env): # TODO
     print(res)
 
 def dev_get_value(env, name, default):
-    return env.GetProjectOption('custom_%s' % name, # ini user config
+    res = env.GetProjectOption('custom_%s' % name, # ini user config
            env.BoardConfig().get('build.%s' % name, default) ) # from board
+    if res == 'ERROR': 
+        print('[ERROR] Cannot find setting', name)
+        exit(1)
+    return res
 
 def dev_init_compiler(env, application_name = 'APPLICATION'):
-    env.DIV = env.BoardConfig().get('build.div', 'ERROR')
-    env.SUB = env.BoardConfig().get('build.sub', 'ERROR')
-    env.MCU = env.BoardConfig().get('build.mcu', 'ERROR')
-    env.COR = env.BoardConfig().get('build.cor', 'ERROR')
-    # check ERROR ?
-    env.SUB = env.SUB.replace("%", env.DIV)
-    env.MCU = env.MCU.replace("%", env.DIV)    
+    env.DIV = env.BoardConfig().get('build.div', 'ERROR')   # STM32L0
+    env.SUB = env.BoardConfig().get('build.sub', 'ERROR')   # %51xx
+    env.MCU = env.BoardConfig().get('build.mcu', 'ERROR')   # %51K8Ux
+    env.SUB = env.SUB.replace("%", env.DIV)                 # STM32L051xx
+    env.MCU = env.MCU.replace("%", env.DIV)                 # STM32L051K8Ux is STM32L051K8U3
+    env.COR = env.BoardConfig().get('build.cor', 'ERROR')   # [ "-march=armv6-m", "-mcpu=cortex-m0plus", "-mthumb" ]    
     
-    #print("+++", env.DIV) # STM32L0
-    #print("+++", env.SUB) # STM32L051xx
-    #print("+++", env.MCU) # STM32L051K8Ux is STM32L051K8U3
-    #print("+++", env.COR) # [ "-march=armv6-m", "-mcpu=cortex-m0plus", "-mthumb" ]
-
     env.optimization = dev_get_value(env, 'optimization', '-Os') # INIDOC
     print('OPTIMIZATION  : %s' % env.optimization)
 
@@ -117,19 +115,27 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
             join('$PROJECT_DIR', 'lib'), 
         ],
         LIBS = [
-            'm', 'c',
+            'm', 'c', '-lnosys',
         ], 
         LINKFLAGS = [ env.COR, env.optimization,
-            '-lnosys',
-            '--specs=nosys.specs',
-            '-nostartfiles',
+            '-nostartfiles',        
+            '-specs=nano.specs',
             '-Wl,-Map=%s.map' % env.subst(join('$BUILD_DIR','$PROGNAME')),
             '-Wl,--gc-sections',
             '--entry=Reset_Handler',
         ],    
         LDSCRIPT_PATH = linker, 
         UPLOADCMD = dev_uploader,
-        # BUILDERS: TODO HEX & BIN  
+        BUILDERS = dict(
+            ELF2HEX = Builder(
+                action = env.VerboseAction(' '.join([ '$OBJCOPY', '-O',  'ihex', '$SOURCES', '$TARGET', ]), 'Building HEX $TARGET'), 
+                suffix = '.hex'
+            ),            
+            ELF2BIN = Builder(
+                action = env.VerboseAction(' '.join([ '$OBJCOPY', '-O',  'binary', '-S', '$SOURCES', '$TARGET', ]), 'Building BIN $TARGET'), 
+                suffix = '.bin'
+            ),
+        ),
     )
 
 dev_init_compiler(env)
@@ -137,6 +143,7 @@ dev_init_compiler(env)
 env.BuildSources(
     join('$BUILD_DIR', env.DIV + "xx_HAL_Driver", "Src"),
     join("$FRAMEWORK_DIR", "Drivers", env.DIV + "xx_HAL_Driver", "Src"),
+    '-<*> +<*_hal*>' # remove LL drivers
 )
 
 env.BuildSources(

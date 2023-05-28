@@ -64,13 +64,16 @@ env.Replace(
 prg = None
 if 'WizIO-STM32-SDK' in env['PIOFRAMEWORK']: 
    elf = env.BuildProgram()
+   bin = env.ELF2BIN( join('$BUILD_DIR', '${PROGNAME}'), elf )
+   hex = env.ELF2HEX( join('$BUILD_DIR', '${PROGNAME}'), elf )
+   prg = env.Alias( 'buildprog', hex)
 
 # DEBUG ####################################################################### TODO
 debug_tool = env.GetProjectOption('debug_tool')
 if None == debug_tool:
-    Default( prg )
+    Default( prg, bin )
 else:   
-    Default( prg )
+    Default( prg, bin )
 
 # UPLOAD ###################################################################### TODO
 upload = env.Alias('upload', prg, env.VerboseAction('$UPLOADCMD', ' - Uploading'), ) 
