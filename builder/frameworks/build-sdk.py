@@ -31,7 +31,8 @@ from common import dev_init_compiler, dev_create_template
 env = DefaultEnvironment()
 
 def template(env):
-        open( join(dir, 'main.c'), 'w').write('''
+    dir = join( env.subst('$PROJECT_DIR'), 'src' )
+    open( join(dir, 'main.c'), 'w').write('''
 /*
  ******************************************************************************
  *
@@ -44,8 +45,6 @@ def template(env):
  *
  ******************************************************************************
 */        
-
-#include "main.h"
 
 int main(void)
 {

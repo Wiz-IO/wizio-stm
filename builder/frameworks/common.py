@@ -22,8 +22,8 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-import sys
-from os.path import join
+import sys, os
+from os.path import join, exists
 from os import listdir
 from platformio import proc
 from SCons.Script import Builder
@@ -47,7 +47,10 @@ def dev_create_template(env, template=None):
     dir = join( env.subst('$PROJECT_DIR'), 'src' )
     if not listdir( dir ):
         if template:
-            template(env)        
+            template(env)  
+        dir = join( env.subst('$PROJECT_DIR'), 'stm' )
+        if dir and not exists(dir):
+            os.makedirs(dir, exist_ok=True)      
 
 def dev_init_compiler(env, application_name = 'APPLICATION'):
     env.DIV = env.BoardConfig().get('build.div', 'ERROR')   # STM32L0

@@ -1,0 +1,23 @@
+{
+  "name": "WizIO-STM-TEST-BOARD",
+  "url": "https://github.com/Wiz-IO/wizio-stm",
+  "vendor": "WizIO",
+  "frameworks": [ "WizIO-STM32-SDK" ],
+
+  "build": {
+    "div"               : "STM32L0",
+    "sub"               : "%51xx",    
+    "mcu"               : "%51K8Ux",
+    "cor"               : [ "-march=armv6-m", "-mcpu=cortex-m0plus", "-mthumb" ],
+
+
+    "f_cpu"             : "32000000L"
+  },
+
+  "debug": { },
+
+  "upload": {
+    "maximum_ram_size"  :  8192,
+    "maximum_size"      : 65536
+  }
+}
