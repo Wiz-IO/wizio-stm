@@ -22,10 +22,10 @@
   "packages": {
     "framework-wizio-stm": {
         "type"          : "framework",
-        "version"       : "1.0.0",        
+        "N-version"     : "1.0.0",        
         "F-version"     : "file://F:/framework-wizio-stm",
-        "U-version"     : "https://github.com/Wiz-IO/framework-wizio-stm.git",
-        "url-sdk"       : "https://github.com/TODO"
+        "version"       : "https://github.com/Wiz-IO/framework-wizio-stm.git",
+        "url-sdk"       : "https://github.com/STMicroelectronics/stm32l0xx_hal_driver ... TODO"
     },
     "toolchain-gccarmnoneeabi": {
         "owner"         : "platformio",
