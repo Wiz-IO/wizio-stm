@@ -1,5 +1,5 @@
 '''
-Copyright 2022 (c) 2022 WizIO ( Georgi Angelov )
+Copyright 2023 (c) WizIO ( Georgi Angelov )
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 following conditions are met:
@@ -22,9 +22,8 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-from os.path import join, dirname, normpath, exists
-from SCons.Script import (AlwaysBuild, Builder, COMMAND_LINE_TARGETS, Default, DefaultEnvironment)
-from colorama import Fore
+from os.path import join, dirname, exists
+from SCons.Script import (AlwaysBuild, Default, DefaultEnvironment)
 
 PLATFORM_NAME  = 'wizio-stm'
 FRAMEWORK_NAME = 'framework-' + PLATFORM_NAME
@@ -71,9 +70,9 @@ if 'WizIO-STM32-SDK' in env['PIOFRAMEWORK']:
 # DEBUG ####################################################################### TODO
 debug_tool = env.GetProjectOption('debug_tool')
 if None == debug_tool:
-    Default( prg, bin )
+    Default( prg ) # ,bin
 else:   
-    Default( prg, bin )
+    Default( prg ) # ,bin
 
 # UPLOAD ###################################################################### TODO
 upload = env.Alias('upload', prg, env.VerboseAction('$UPLOADCMD', ' - Uploading'), ) 

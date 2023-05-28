@@ -1,5 +1,5 @@
 '''
-Copyright 2022 (c) 2022 WizIO ( Georgi Angelov )
+Copyright 2023 (c) WizIO ( Georgi Angelov )
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 following conditions are met:
