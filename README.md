@@ -1,7 +1,7 @@
 #  STM32 EXPERIMENTAL PLATFORM 
 ## 2023 WizIO ( Georgi Angelov )
 
-( is not ready ... don`t install )
+_( is not ready ... don`t install )_
 
 ## HOW TO
 * Create STM32CubeMX ( STM32L051K8U3 ) and export to MAKE project
@@ -12,7 +12,7 @@
 * Drivers and CMSIS not need - exist with framework
 
 ## SUPPORT
-( for now )
+_( for now )_
 * STM32L051K8U3 
 
 ## TODO
