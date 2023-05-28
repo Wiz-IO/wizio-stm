@@ -11,6 +11,10 @@
 * Move C files from **Src** to **src**
 * Drivers and CMSIS not need - exist with framework
 
+## SUPPORT
+( for now )
+* STM32L051K8U3 
+
 ## TODO
 * Add other chips ( boards )
 * Add Hal Drivers & CMSIS
