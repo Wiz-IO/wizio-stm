@@ -11,6 +11,7 @@
   },
   "version": "1.0.0",
   "packageRepositories" : [ "http://dl.platformio.org/packages/manifest.json" ],
+  
   "frameworks": {
       "WizIO-STM32-SDK" : {
         "package"       : "framework-wizio-stm",
@@ -19,6 +20,7 @@
         "title"         : "WizIO STM32 SDK"
       }
   },
+
   "packages": {
     "framework-wizio-stm": {
         "type"          : "framework",
@@ -31,6 +33,19 @@
         "owner"         : "platformio",
         "type"          : "toolchain",
         "version"       : "~1.90201.0"
+    },
+
+    "tool-openocd": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "~2.1100.0"
+    },    
+    "tool-jlink": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "^1.63208.0"
     }
 
   }

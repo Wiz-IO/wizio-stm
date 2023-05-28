@@ -22,11 +22,15 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
+import json
+import os
+import sys
 from os.path import join, dirname, exists
 from importlib.machinery import SourceFileLoader
 from platformio.managers.platform import PlatformBase
 
 FRAMEWORK_NAME = 'framework-wizio-stm'
+IS_WINDOWS = sys.platform.startswith("win")
 
 class WiziostmPlatform(PlatformBase):
 
@@ -37,12 +41,6 @@ class WiziostmPlatform(PlatformBase):
         board = PlatformBase.get_boards(self, id_)
         # TODO: Debuger
         return board
-
-    def get_package_type(self, name):
-        Type = self.packages[name].get('type')
-        if 'framework' == Type:
-            self.install(1)
-        return Type
 
     def on_installed(self):
         return
@@ -57,3 +55,78 @@ class WiziostmPlatform(PlatformBase):
                 self.packages[FRAMEWORK_NAME].get('url-sdk'),
                 mode 
             )
+
+    def get_boards(self, id_=None):
+        result = PlatformBase.get_boards(self, id_)
+        if not result:
+            return result
+        if id_:
+            return self._add_default_debug_tools(result)
+        else:
+            for key, value in result.items():
+                result[key] = self._add_default_debug_tools(result[key])
+        return result
+
+    def _add_default_debug_tools(self, board):
+        debug = board.manifest.get("debug", {})
+        upload_protocols = board.manifest.get("upload", {}).get(
+            "protocols", [])
+        if "tools" not in debug:
+            debug["tools"] = {}
+
+        # BlackMagic, J-Link, ST-Link
+        for link in ("blackmagic", "jlink", "stlink", "cmsis-dap"):
+            if link not in upload_protocols or link in debug["tools"]:
+                continue
+            if link == "blackmagic":
+                debug["tools"]["blackmagic"] = {
+                    "hwids": [["0x1d50", "0x6018"]],
+                    "require_debug_port": True
+                }
+            elif link == "jlink":
+                assert debug.get("jlink_device"), (
+                    "Missed J-Link Device ID for %s" % board.id)
+                debug["tools"][link] = {
+                    "server": {
+                        "package": "tool-jlink",
+                        "arguments": [
+                            "-singlerun",
+                            "-if", "SWD",
+                            "-select", "USB",
+                            "-device", debug.get("jlink_device"),
+                            "-port", "2331"
+                        ],
+                        "executable": ("JLinkGDBServerCL.exe"
+                                       if IS_WINDOWS else
+                                       "JLinkGDBServer")
+                    }
+                }
+            else:
+                server_args = ["-s", "$PACKAGE_DIR/scripts"]
+                if debug.get("openocd_board"):
+                    server_args.extend([
+                        "-f", "board/%s.cfg" % debug.get("openocd_board")
+                    ])
+                else:
+                    assert debug.get("openocd_target"), (
+                        "Missed target configuration for %s" % board.id)
+                    server_args.extend([
+                        "-f", "interface/%s.cfg" % link,
+                        "-c", "transport select %s" % (
+                            "hla_swd" if link == "stlink" else "swd"),
+                        "-f", "target/%s.cfg" % debug.get("openocd_target")
+                    ])
+                    server_args.extend(debug.get("openocd_extra_args", []))
+
+                debug["tools"][link] = {
+                    "server": {
+                        "package": "tool-openocd",
+                        "executable": "bin/openocd",
+                        "arguments": server_args
+                    }
+                }
+            debug["tools"][link]["onboard"] = link in debug.get("onboard_tools", [])
+            debug["tools"][link]["default"] = link in debug.get("default_tools", [])
+
+        board.manifest["debug"] = debug
+        return board

@@ -29,6 +29,8 @@ from platformio import proc
 from SCons.Script import Builder
 
 def dev_uploader(target, source, env): # TODO
+    print("UPLOAD TODO !!!")
+    exit(0)    
     # "C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI" -c port=SWD freq=4000 -w $< --start
     APP_PATH = dev_get_value(env, 'STM32_PRG_CLI', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
     args = [ APP_PATH, '-c', 'port=SWD', 'freq=4000', '-w', 'ELF', '--start' ]
