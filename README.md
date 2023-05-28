@@ -1,4 +1,4 @@
-#  STM32 EXPERIMENTAL PLATFORM 
+#  STM32 EXPERIMENTAL PLATFORM ( IO )
 ## 2023 WizIO ( Georgi Angelov )
 
 _( is not ready ... don`t install )_
