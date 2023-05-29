@@ -11,7 +11,7 @@ _( is not ready ( tested ) ... don`t install )_
 * Move C files from **Src** to **src**
 * Drivers and CMSIS not need - exist with framework
 
-![stm]([https://raw.githubusercontent.com/Wiz-IO/LIB/master/microchip/Arduino-PIC32MZ.jpg](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png))
+![stm](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png)
 
 ## SUPPORT
 _( for now )_
