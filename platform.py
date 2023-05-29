@@ -108,16 +108,13 @@ class WiziostmPlatform(PlatformBase):
                         "-f", "board/%s.cfg" % debug.get("openocd_board")
                     ])
                 else:
-                    assert debug.get("openocd_target"), (
-                        "Missed target configuration for %s" % board.id)
+                    assert debug.get("openocd_target"), ( "Missed target configuration for %s" % board.id )
                     server_args.extend([
                         "-f", "interface/%s.cfg" % link,
-                        "-c", "transport select %s" % (
-                            "hla_swd" if link == "stlink" else "swd"),
-                        "-f", "target/%s.cfg" % debug.get("openocd_target")
+                        "-c", "transport select %s" % ( "hla_swd" if link == "stlink" else "swd" ),
+                        "-f", "target/%s.cfg" % debug.get( "openocd_target" )
                     ])
                     server_args.extend(debug.get("openocd_extra_args", []))
-
                 debug["tools"][link] = {
                     "server": {
                         "package": "tool-openocd",

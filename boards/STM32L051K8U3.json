@@ -9,8 +9,7 @@
     "sub"               : "%51xx",    
     "mcu"               : "%51K8Ux",
     "cor"               : [ "-march=armv6-m", "-mcpu=cortex-m0plus", "-mthumb" ],
-
-
+    
     "f_cpu"             : "32000000L"
   },
 
@@ -22,7 +21,6 @@
     "onboard_tools": [
       "stlink"
     ],
-    "openocd_board": "STM32L051K8U3",
     "openocd_target": "stm32l0",
     "svd_path": "STM32L051x.svd"
   },
@@ -33,10 +31,7 @@
     "protocol": "stlink",
     "protocols": [
       "jlink",
-      "cmsis-dap",
-      "stlink",
-      "blackmagic",
-      "mbed"
+      "stlink"
     ]    
   }
 }

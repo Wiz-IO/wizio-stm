@@ -23,23 +23,23 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
 import sys, os
-from os.path import join, exists
+from os.path import join, exists, basename
 from os import listdir
 from platformio import proc
 from SCons.Script import Builder
 
-def dev_uploader(target, source, env): # TODO
-    print("UPLOAD TODO !!!")
-    exit(0)    
-    # "C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI" -c port=SWD freq=4000 -w $< --start
-    APP_PATH = dev_get_value(env, 'STM32_PRG_CLI', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
-    args = [ APP_PATH, '-c', 'port=SWD', 'freq=4000', '-w', 'ELF', '--start' ]
-    res = proc.exec_command( args, stdout=sys.stdout, stderr=sys.stderr, stdin=sys.stdin, cwd='' )
-    print(res)
+def dev_uploader(target, source, env): 
+    APP = dev_get_value(env, 'STM32CP', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
+    ELF = env.subst(join('$BUILD_DIR','$PROGNAME')) + '.elf'
+    ELF = ELF.replace("\\", "/")
+    ARG = [ APP, '-c', 'port=SWD', 'freq=4000', '-w', ELF, '--start' ]
+    proc.exec_command( ARG, stdout = sys.stdout ) # , stderr = sys.stderr, stdin = sys.stdin
+    # {'out': None, 'err': None, 'returncode': 0}   
+   
 
 def dev_get_value(env, name, default):
     res = env.GetProjectOption('custom_%s' % name, # ini user config
-           env.BoardConfig().get('build.%s' % name, default) ) # from board
+            env.BoardConfig().get('build.%s' % name, default) ) # from board
     if res == 'ERROR': 
         print('[ERROR] Cannot find setting', name)
         exit(1)
@@ -67,7 +67,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
 
     linker = dev_get_value(env, 'linker', 'DEFAULT') # INIDOC
     if 'DEFAULT' == linker: linker = join('$PROJECT_DIR', 'stm' , env.MCU + '_FLASH.ld')
-    print('LINKER        : %s' % linker )  
+    print('LINKER        : %s' % basename(linker) )  
 
     env.Replace( 
         SIZETOOL = 'arm-none-eabi-size',
@@ -82,7 +82,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
     env.Append( 
         ASFLAGS=[ env.COR, '-x', 'assembler-with-cpp' ],
         CPPDEFINES = [
-            'USE_HAL_DRIVER',
+            'USE_HAL_DRIVER', # LL ?
             env.SUB, # STM32L051xx
         ],
         CPPPATH = [
@@ -123,17 +123,17 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
             join('$PROJECT_DIR', 'lib'), 
         ],
         LIBS = [
-            'm', 'c', '-lnosys',
+            'm', 'c', 'nosys', 'gcc', 'stdc++',
         ], 
         LINKFLAGS = [ env.COR, env.optimization,
             '-nostartfiles',        
-            '-specs=nano.specs',
             '-Wl,-Map=%s.map' % env.subst(join('$BUILD_DIR','$PROGNAME')),
             '-Wl,--gc-sections',
+            '--specs=nano.specs',
+            '--specs=nosys.specs',            
             '--entry=Reset_Handler',
         ],    
         LDSCRIPT_PATH = linker, 
-        UPLOADCMD = dev_uploader,
         BUILDERS = dict(
             ELF2HEX = Builder(
                 action = env.VerboseAction(' '.join([ '$OBJCOPY', '-O',  'ihex', '$SOURCES', '$TARGET', ]), 'Building HEX $TARGET'), 
@@ -143,7 +143,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
                 action = env.VerboseAction(' '.join([ '$OBJCOPY', '-O',  'binary', '-S', '$SOURCES', '$TARGET', ]), 'Building BIN $TARGET'), 
                 suffix = '.bin'
             ),
-        ),
+        ),       
     )
 
     env.BuildSources(
@@ -151,3 +151,10 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
         join("$FRAMEWORK_DIR", "Drivers", env.DIV + "xx_HAL_Driver", "Src"),
         '-<*> +<*_hal*>' # remove LL drivers
     )
+
+    # STM32CubeProgrammer exist ?
+    if env.GetProjectOption("upload_protocol") == None:
+        prog = dev_get_value(env, 'STM32CP', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
+        if exists(prog + '.exe'): 
+            env.Append( UPLOADCMD = dev_uploader )
+      
