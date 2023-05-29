@@ -21,7 +21,7 @@ _( for now )_
 * STM32CubeProgrammer
 * STLink @ OpenOCD
 
-## DEGUB
+## DEBUG
 * STLink @ OpenOCD
 
 ## TODO
