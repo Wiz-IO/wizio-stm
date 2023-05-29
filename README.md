@@ -11,13 +11,22 @@ _( is not ready ( tested ) ... don`t install )_
 * Move C files from **Src** to **src**
 * Drivers and CMSIS not need - exist with framework
 
+![stm]([https://raw.githubusercontent.com/Wiz-IO/LIB/master/microchip/Arduino-PIC32MZ.jpg](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png))
+
 ## SUPPORT
 _( for now )_
 * STM32L051K8U3 
 
+## UPLOAD
+* STM32CubeProgrammer
+* STLink @ OpenOCD
+
+## DEGUB
+* STLink @ OpenOCD
+
 ## TODO
 * Add other chips ( boards )
 * Add Hal Drivers & CMSIS
-* Support for stlink & jlink
+* Support for jlink
 
 >If you want to help / support or treat me to Coffee  [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ESUP9LCZMZTD6)
