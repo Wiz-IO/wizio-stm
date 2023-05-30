@@ -1,5 +1,4 @@
 #  STM32 EXPERIMENTAL PLATFORM ( IO )
-## 2023 WizIO ( Georgi Angelov )
 
 ## HOW TO
 * Create STM32CubeMX ( STM32L051K8U3 ) and export to MAKE project
