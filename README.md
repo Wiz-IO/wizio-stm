@@ -1,5 +1,13 @@
 #  STM32 EXPERIMENTAL PLATFORM ( IO )
 
+## Why PlatformIO
+* I generally use it at work ( I will only add chips those that I use and can test )
+* Full Open Source
+* Full PlatformIO support
+* Full Python support
+* Full STLink OpenOCD support
+* Do you need anything else ???
+
 ## HOW TO
 * Create STM32CubeMX ( STM32L051K8U3 ) and export to MAKE project
 * Create PlatformIO project ( STM32L051K8U3 ... "board" ) 
