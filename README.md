@@ -15,7 +15,7 @@
 ## SUPPORT
 _( for now )_
 * STM32L051K8U3 
-* STM32F100R8T6B ( not tested )
+* STM32F100R8T6B ( not tested as hardware )
 
 ## UPLOAD
 * STM32CubeProgrammer
