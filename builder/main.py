@@ -79,7 +79,7 @@ upload_source   = join("$BUILD_DIR", "${PROGNAME}.elf")
 upload_actions  = []
 
 # UPLOAD ###################################################################### TODO
-if upload_protocol == None: # STM32CubeProgrammer if exists
+if upload_protocol == None or upload_protocol == "stlinkv1": # STM32CubeProgrammer if exists
    upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
 elif upload_protocol == "stlink":
    openocd_args = [ "-d%d" % (2 if int(ARGUMENTS.get("PIOVERBOSE", 0)) else 1) ]
@@ -95,8 +95,6 @@ elif upload_protocol == "stlink":
    upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
 elif upload_protocol.startswith("jlink"):
    print('JLINK TODO')   
-elif upload_protocol == "custom":
-   upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
 else:
    sys.stderr.write("Warning! Unknown upload protocol %s\n" % upload_protocol)
 AlwaysBuild( env.Alias("upload", upload_source, upload_actions) )    

@@ -28,15 +28,6 @@ from os import listdir
 from platformio import proc
 from SCons.Script import Builder
 
-def dev_uploader(target, source, env): 
-    APP = dev_get_value(env, 'STM32CP', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
-    ELF = env.subst(join('$BUILD_DIR','$PROGNAME')) + '.elf'
-    ELF = ELF.replace("\\", "/")
-    ARG = [ APP, '-c', 'port=SWD', 'freq=4000', '-w', ELF, '--start' ]
-    proc.exec_command( ARG, stdout = sys.stdout ) # , stderr = sys.stderr, stdin = sys.stdin
-    # {'out': None, 'err': None, 'returncode': 0}   
-   
-
 def dev_get_value(env, name, default):
     res = env.GetProjectOption('custom_%s' % name, # ini user config
             env.BoardConfig().get('build.%s' % name, default) ) # from board
@@ -45,6 +36,20 @@ def dev_get_value(env, name, default):
         exit(1)
     return res
 
+def dev_uploader(target, source, env): 
+    if 'stlinkv1' == env.GetProjectOption("upload_protocol"):
+        APP = dev_get_value(env, 'STM32LC', 'C:/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility/ST-LINK_CLI') # INIDOC
+        HEX = env.subst(join('$BUILD_DIR','$PROGNAME')) + '.hex'
+        HEX = HEX.replace("\\", "/")
+        ARG = [ APP, '-P', HEX, '-V', '-Q', '-Rst' ]  # ? '0x08000000'
+    else:
+        APP = dev_get_value(env, 'STM32CP', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
+        ELF = env.subst(join('$BUILD_DIR','$PROGNAME')) + '.elf'
+        ELF = ELF.replace("\\", "/")
+        ARG = [ APP, '-c', 'port=SWD', 'freq=4000', '-w', ELF, '--start', '-q' ]    
+    proc.exec_command( ARG, stdout = sys.stdout )
+    # {'out': None, 'err': None, 'returncode': 0}   
+   
 def dev_create_template(env, template=None):
     dir = join( env.subst('$PROJECT_DIR'), 'src' )
     if not listdir( dir ):
@@ -143,7 +148,8 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
                 action = env.VerboseAction(' '.join([ '$OBJCOPY', '-O',  'binary', '-S', '$SOURCES', '$TARGET', ]), 'Building BIN $TARGET'), 
                 suffix = '.bin'
             ),
-        ),       
+        ),      
+        UPLOADCMD = dev_uploader
     )
 
     env.BuildSources(
@@ -151,10 +157,4 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
         join("$FRAMEWORK_DIR", "Drivers", env.DIV + "xx_HAL_Driver", "Src"),
         '-<*> +<*_hal*>' # remove LL drivers
     )
-
-    # STM32CubeProgrammer exist ?
-    if env.GetProjectOption("upload_protocol") == None:
-        prog = dev_get_value(env, 'STM32CP', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
-        if exists(prog + '.exe'): 
-            env.Append( UPLOADCMD = dev_uploader )
       
