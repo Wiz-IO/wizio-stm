@@ -1,0 +1,38 @@
+{
+  "name":         "STM32VIRTUAL",
+  "url":          "https://github.com/Wiz-IO/wizio-stm",
+  "vendor":       "WizIO",
+  
+  "frameworks":   [ "WizIO-STM32-SDK" ],
+
+  "build": {
+    "div"               : "CHANGE",
+    "sub"               : "CHANGE",    
+    "mcu"               : "CHANGE",
+    "cor"               : ["CHANGE"],
+    
+    "f_cpu"             : "CHANGE"
+  },
+
+  "debug": {
+    "default_tools": [
+      "stlink"
+    ],
+    "jlink_device": "CHANGE",
+    "onboard_tools": [
+      "stlink"
+    ],
+    "openocd_target": "CHANGE",
+    "svd_path": "CHANGE"
+  },
+
+  "upload": {
+    "maximum_ram_size"  : 0,
+    "maximum_size"      : 0,
+    "protocol": "stlink",
+    "protocols": [
+      "jlink",
+      "stlink"
+    ]    
+  }
+}
