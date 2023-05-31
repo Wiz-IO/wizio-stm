@@ -4,7 +4,7 @@
 * I generally use it at work ( I will only add chips those that I use and can test )
 * Full Open Source
 * Full PlatformIO support
-* Full Python support
+* Full Python build logic
 * Full STLink OpenOCD support
 * Do you need anything else ???
 
