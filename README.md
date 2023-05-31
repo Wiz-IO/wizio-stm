@@ -6,7 +6,7 @@
 * Full PlatformIO support
 * Full Python build logic
 * Full STLink OpenOCD support
-* Do you need anything else ???
+* Do you need anything else ?!?
 
 ## HOW TO
 * Create STM32CubeMX ( STM32L051K8U3 ) and export to MAKE project
@@ -21,7 +21,7 @@
 ![stm](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png)
 
 ## SUPPORT
-**will support ALL L0, L4 ... etc as "virtual" board** ( later )<br><br>
+**Will support all L0, L4 ... etc as "virtual" board** ( later )<br><br>
 _( for now )_
 * STM32L051K8U3 
 * STM32L431RBT6 ( not tested as hardware )
