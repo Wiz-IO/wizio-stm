@@ -10,7 +10,7 @@
 
 ## HOW TO
 * Create STM32CubeMX ( STM32L051K8U3 ) and export to MAKE project
-* Create PlatformIO project ( example STM32L051K8U3 ... [boards](https://github.com/Wiz-IO/wizio-stm/tree/main/boards) )
+* Create PlatformIO project ( as example: STM32L051K8U3 ... [boards](https://github.com/Wiz-IO/wizio-stm/tree/main/boards) )
 * Move ALL **stm** files ( that contain "stm" in the filename ) <br>from CubeMX Project **Root**, **Inc** and **Src** to project folder **stm** <br> ( STM32L051K8Ux_FLASH.ld, startup_stm32l051xx.S ...etc )
 * Move H files from **Inc** to **include**
 * Move C files from **Src** to **src**
