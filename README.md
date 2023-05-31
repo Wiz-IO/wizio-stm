@@ -22,7 +22,7 @@
 
 ## SUPPORT
 **Will support all L0, L4 ... etc as "virtual" board** ( later )<br><br>
-_( for now )_
+_For now_
 * STM32L051K8U3 
 * STM32L431RBT6 ( not tested as hardware )
 * STM32L431RCY6TR ( not tested as hardware )
