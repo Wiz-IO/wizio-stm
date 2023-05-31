@@ -1,8 +1,9 @@
 {
-  "name": "STM32L051K8U3",
-  "url": "https://github.com/Wiz-IO/wizio-stm",
-  "vendor": "WizIO",
-  "frameworks": [ "WizIO-STM32-SDK" ],
+  "name":         "STM32L051K8U3",
+  "url":          "https://github.com/Wiz-IO/wizio-stm",
+  "vendor":       "WizIO",
+  
+  "frameworks":   [ "WizIO-STM32-SDK" ],
 
   "build": {
     "div"               : "STM32L0",

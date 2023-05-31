@@ -1,5 +1,6 @@
 {
-  "name":         "STM32F100R8T6B",
+  "name":         "STM32F100RBT6B",
+  "description":  "STM32VLDISCOVERY",
   "url":          "https://github.com/Wiz-IO/wizio-stm",
   "vendor":       "WizIO",
   
@@ -8,7 +9,7 @@
   "build": {
     "div"               : "STM32F1",
     "sub"               : "%00xB",    
-    "mcu"               : "%00R8Tx",
+    "mcu"               : "%00RBTx",
     "cor"               : [ "-march=armv7-m", "-mcpu=cortex-m3", "-mthumb" ],
     
     "f_cpu"             : "24000000L"
@@ -18,7 +19,7 @@
     "default_tools": [
       "stlink"
     ],
-    "jlink_device": "STM32F100R8T6B",
+    "jlink_device": "STM32F100RBT6B",
     "onboard_tools": [
       "stlink"
     ],
@@ -28,7 +29,7 @@
 
   "upload": {
     "maximum_ram_size"  :   8192,
-    "maximum_size"      :  65536,
+    "maximum_size"      : 131072,
     "protocol": "stlink",
     "protocols": [
       "jlink",
