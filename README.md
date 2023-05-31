@@ -20,7 +20,7 @@
 ![stm](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png)
 
 ## SUPPORT
-will support **ALL** L0, L4 ... etc as "virtual" board<br>
+**will support ALL L0, L4 ... etc as "virtual" board**<br><br>
 _( for now )_
 * STM32L051K8U3 
 * STM32L431RBT6 ( not tested as hardware )
