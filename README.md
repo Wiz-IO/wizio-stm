@@ -31,11 +31,13 @@ _( for now )_
 * STM32VIRTUAL BOARD ( TODO ... load params from project ini )
 
 ## UPLOAD
-* STM32CubeProgrammer
+* STM32 Cube Programmer ( maybe only Windows )
+* STM32 ST-LINK CLI Programmer ( maybe only Windows )
 * STLink @ OpenOCD
 
 ## DEBUG
 * STLink @ OpenOCD
+* J-LINK ( TODO )
 
 ## TODO
 * Add other chips ( boards )
