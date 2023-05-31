@@ -28,6 +28,7 @@ _( for now )_
 * STM32L431RCY6TR ( not tested as hardware )
 * STM32F100RBT6B
 * STM32F100R8T6B
+* STM32VIRTUAL ( TODO ... load params from project ini )
 
 ## UPLOAD
 * STM32CubeProgrammer
