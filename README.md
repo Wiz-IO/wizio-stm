@@ -28,7 +28,7 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * STM32L431RCY6TR ( not tested as hardware )
 * STM32F100RBT6B
 * STM32F100R8T6B
-* **STM32VIRTUAL Board** - Load chip params from Project INI ( [TODO Documentation](https://github.com/Wiz-IO/wizio-stm/blob/main/examples/TEST-VIRTUAL/platformio.ini#L16) )
+* **STM32VIRTUAL Board - for ALL chips from this list**  [ Load params from Project INI - TODO Documentation](https://github.com/Wiz-IO/wizio-stm/blob/main/examples/TEST-VIRTUAL/platformio.ini#L16)
 * * STM32L0x
 * * STM32L1x
 * * STM32L4x
