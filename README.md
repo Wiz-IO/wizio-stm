@@ -1,5 +1,7 @@
 #  STM32 EXPERIMENTAL PLATFORM ( IO )
 
+_( The project is a work in progress, there may be bugs... please, report )_
+
 ## Why PlatformIO
 * I generally use it at work ( I will only add chips those that I use and can test )
 * Full Open Source
