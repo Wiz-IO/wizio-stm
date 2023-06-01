@@ -21,14 +21,12 @@
 ![stm](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png)
 
 ## SUPPORT
-**Will support all L0, L4 ... etc as "virtual" board** ( later )<br><br>
-_For now_
 * STM32L051K8U3 
 * STM32L431RBT6 ( not tested as hardware )
 * STM32L431RCY6TR ( not tested as hardware )
 * STM32F100RBT6B
 * STM32F100R8T6B
-* **STM32VIRTUAL Board** load params from project ini ( [TODO Documentation](https://github.com/Wiz-IO/wizio-stm/blob/main/examples/TEST-VIRTUAL/platformio.ini#L16) )
+* **STM32VIRTUAL Board** - Load chip params from Project INI ( [TODO Documentation](https://github.com/Wiz-IO/wizio-stm/blob/main/examples/TEST-VIRTUAL/platformio.ini#L16) )
 * * STM32L0x
 * * STM32L1x
 * * STM32L4x
