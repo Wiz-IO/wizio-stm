@@ -27,6 +27,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from os.path import join
 from SCons.Script import DefaultEnvironment
 from common import dev_init_compiler, dev_create_template
+from modules import dev_init_modules
 
 env = DefaultEnvironment()
 
@@ -64,3 +65,5 @@ env.BuildSources(
     join('$BUILD_DIR', 'stm'),
     join("$PROJECT_DIR", "stm")
 )
+
+dev_init_modules(env)

@@ -59,21 +59,49 @@ def dev_create_template(env, template=None):
         if dir and not exists(dir):
             os.makedirs(dir, exist_ok=True)      
 
+def dev_load_virtual_board(env):
+    def load_param(param):
+        res = env.GetProjectOption(param, 'ERROR')
+        if res == 'ERROR':
+            print('[ERROR] Missing parameter: %s' % param)
+            exit(0)
+        return res
+    env.DIV = load_param('custom_section')
+    env.SUB = load_param('custom_subsection')    
+    env.MCU = load_param('custom_mcu')    
+    env.CORTEX = load_param('custom_cortex').replace(' ', '').split(',')
+    env.BoardConfig().update('upload.maximum_ram_size', env.GetProjectOption('custom_ram_size', '0'))
+    env.BoardConfig().update('upload.maximum_size',     env.GetProjectOption('custom_rom_size', '0')) 
+    # TODO "jlink_device"    : "?"
+    # TODO "openocd_target"  : "?"
+    # TODO "svd_path"        : "?"    
+
 def dev_init_compiler(env, application_name = 'APPLICATION'):
-    env.DIV = env.BoardConfig().get('build.div', 'ERROR')   # STM32L0
-    env.SUB = env.BoardConfig().get('build.sub', 'ERROR')   # %51xx
-    env.MCU = env.BoardConfig().get('build.mcu', 'ERROR')   # %51K8Ux
-    env.SUB = env.SUB.replace("%", env.DIV)                 # STM32L051xx
-    env.MCU = env.MCU.replace("%", env.DIV)                 # STM32L051K8Ux is STM32L051K8U3
-    env.COR = env.BoardConfig().get('build.cor', 'ERROR')   # [ "-march=armv6-m", "-mcpu=cortex-m0plus", "-mthumb" ]    
+    name = env.BoardConfig().get('name', 'ERROR').upper()
+    if 'VIRTUAL' in name: 
+        dev_load_virtual_board(env)        
+    else: # BOARD
+        env.DIV = env.BoardConfig().get('build.div', 'ERROR')      # STM32L0
+        env.SUB = env.BoardConfig().get('build.sub', 'ERROR')      # %51xx
+        env.MCU = env.BoardConfig().get('build.mcu', 'ERROR')      # %51K8Ux
+        env.SUB = env.SUB.replace("%", env.DIV)                    # STM32L051xx
+        env.MCU = env.MCU.replace("%", env.DIV)                    # STM32L051K8Ux is STM32L051K8U3
+        env.CORTEX = env.BoardConfig().get('build.cor', 'ERROR')   # [ "-march=armv6-m", "-mcpu=cortex-m0plus", "-mthumb" ]    
     
+    print('SECTION       : %s' % env.DIV)
+    print('SUBSECTION    : %s' % env.SUB)
+    print('MCU           : %s' % env.MCU)
+    print('CORTEX        : %s' % env.CORTEX)
+
+    linker = dev_get_value(env, 'linker', 'DEFAULT') # INIDOC
+    if 'DEFAULT' == linker: 
+        linker = join('$PROJECT_DIR', 'stm' , env.MCU + '_FLASH.ld')
+    print('LINKER        : %s' % basename(linker) )  
+
     env.optimization = dev_get_value(env, 'optimization', '-Os') # INIDOC
     print('OPTIMIZATION  : %s' % env.optimization)
 
-    linker = dev_get_value(env, 'linker', 'DEFAULT') # INIDOC
-    if 'DEFAULT' == linker: linker = join('$PROJECT_DIR', 'stm' , env.MCU + '_FLASH.ld')
-    print('LINKER        : %s' % basename(linker) )  
-
+    #exit(0) 
     env.Replace( 
         SIZETOOL = 'arm-none-eabi-size',
         SIZEPROGREGEXP = r"^(?:\.boot2|\.text|\.data|\.rodata|\.text.align|\.ARM.exidx)\s+(\d+).*",
@@ -85,7 +113,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
     )  
 
     env.Append( 
-        ASFLAGS=[ env.COR, '-x', 'assembler-with-cpp' ],
+        ASFLAGS=[ env.CORTEX, '-x', 'assembler-with-cpp' ],
         CPPDEFINES = [
             'USE_HAL_DRIVER', # LL ?
             env.SUB, # STM32L051xx
@@ -103,7 +131,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
 
         ],
         #CFLAGS = [],
-        CCFLAGS = [ env.COR, env.optimization,
+        CCFLAGS = [ env.CORTEX, env.optimization,
             "-fdata-sections",
             "-ffunction-sections",
             "-Wall",
@@ -130,7 +158,7 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
         LIBS = [
             'm', 'c', 'nosys', 'gcc', 'stdc++',
         ], 
-        LINKFLAGS = [ env.COR, env.optimization,
+        LINKFLAGS = [ env.CORTEX, env.optimization,
             '-nostartfiles',        
             '-Wl,-Map=%s.map' % env.subst(join('$BUILD_DIR','$PROGNAME')),
             '-Wl,--gc-sections',
@@ -153,8 +181,9 @@ def dev_init_compiler(env, application_name = 'APPLICATION'):
     )
 
     env.BuildSources(
-        join('$BUILD_DIR', env.DIV + "xx_HAL_Driver", "Src"),
+        join('$BUILD_DIR', "HAL"),
         join("$FRAMEWORK_DIR", "Drivers", env.DIV + "xx_HAL_Driver", "Src"),
-        '-<*> +<*_hal*>' # remove LL drivers
+        # '-<*> +<*_hal*>' # remove LL drivers
     )
       
+    #print(env.Dump())

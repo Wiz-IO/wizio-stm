@@ -71,16 +71,22 @@ if 'WizIO-STM32-SDK' in env['PIOFRAMEWORK']:
    bin = env.ELF2BIN( join('$BUILD_DIR', '${PROGNAME}'), elf )
    hex = env.ELF2HEX( join('$BUILD_DIR', '${PROGNAME}'), elf )
    prg = env.Alias( 'buildprog', hex)
-   AlwaysBuild( bin, hex )
+   AlwaysBuild( hex, bin )
 
 debug_tools     = board.get("debug.tools", {})
 upload_protocol = env.GetProjectOption("upload_protocol")
-upload_source   = join("$BUILD_DIR", "${PROGNAME}.elf")
-upload_actions  = []
+upload_actions  = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
+
+# DEBUG ####################################################################### TODO
+debug_tool = env.GetProjectOption('debug_tool')
+if None == debug_tool:
+   Default( hex, bin ) 
+else:   
+   Default( hex, bin ) 
 
 # UPLOAD ###################################################################### TODO
-if upload_protocol == None or upload_protocol == "stlinkv1": # STM32CubeProgrammer if exists
-   upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
+if upload_protocol == None or upload_protocol == "stlinkv1":
+   pass
 elif upload_protocol == "stlink":
    openocd_args = [ "-d%d" % (2 if int(ARGUMENTS.get("PIOVERBOSE", 0)) else 1) ]
    openocd_args.extend( debug_tools.get(upload_protocol).get("server").get("arguments", []) )
@@ -92,17 +98,12 @@ elif upload_protocol == "stlink":
       UPLOADER = "openocd",
       UPLOADERFLAGS = openocd_args,
       UPLOADCMD = "$UPLOADER $UPLOADERFLAGS")
-   upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
 elif upload_protocol.startswith("jlink"):
    print('JLINK TODO')   
 else:
    sys.stderr.write("Warning! Unknown upload protocol %s\n" % upload_protocol)
-AlwaysBuild( env.Alias("upload", upload_source, upload_actions) )    
 
-# DEBUG ####################################################################### TODO
-debug_tool = env.GetProjectOption('debug_tool')
-if None == debug_tool:
-   Default( bin, hex ) 
-else:   
-   Default( bin, hex ) 
+AlwaysBuild( env.Alias("upload", prg, upload_actions) )    
+
+
 
