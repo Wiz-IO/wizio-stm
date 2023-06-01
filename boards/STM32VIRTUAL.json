@@ -11,7 +11,7 @@
     "mcu"               : "CHANGE",
     "cor"               : ["CHANGE"],
     
-    "f_cpu"             : "CHANGE"
+    "f_cpu"             : "16000000"
   },
 
   "debug": {
@@ -32,7 +32,8 @@
     "protocol": "stlink",
     "protocols": [
       "jlink",
-      "stlink"
+      "stlink",
+      "stlinkv1"
     ]    
   }
 }
