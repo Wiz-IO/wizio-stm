@@ -28,20 +28,23 @@ _For now_
 * STM32L431RCY6TR ( not tested as hardware )
 * STM32F100RBT6B
 * STM32F100R8T6B
-* STM32VIRTUAL Board ( TODO ... load params from project ini )
+* **STM32VIRTUAL Board** load params from project ini ( [TODO Documentation](https://github.com/Wiz-IO/wizio-stm/blob/main/examples/TEST-VIRTUAL/platformio.ini#L16) )
+* * STM32L0x
+* * STM32L1x
+* * STM32L4x
+* * STM32F0x
+* * STM32F1x
+* * STM32F4x
+* * TODO etc
 
 ## UPLOAD
 * STM32 Cube Programmer ( maybe only Windows )
 * STM32 ST-LINK CLI Programmer ( maybe only Windows )
 * STLink @ OpenOCD
+* J-LINK ( TODO )
 
 ## DEBUG
 * STLink @ OpenOCD
 * J-LINK ( TODO )
-
-## TODO
-* Add other chips ( boards )
-* Add Hal Drivers & CMSIS
-* Support for jlink
 
 >If you want to help / support or treat me to Coffee  [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ESUP9LCZMZTD6)
