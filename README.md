@@ -16,7 +16,7 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * Move ALL **stm** files ( that contain "stm" in the filename ) <br>from CubeMX Project **Root**, **Inc** and **Src** to project folder **stm** <br> ( STM32L051K8Ux_FLASH.ld, startup_stm32l051xx.S ...etc )
 * Move H files from **Inc** to **include**
 * Move C files from **Src** to **src**
-* Drivers and CMSIS not need - exist with framework
+* Drivers and CMSIS **not need** - exist with framework
 * [Documetnation](https://github.com/Wiz-IO/wizio-stm/wiki/Documentation)
 * [Examples](https://github.com/Wiz-IO/wizio-stm/tree/main/examples)
 * [Framework](https://github.com/Wiz-IO/framework-wizio-stm)
