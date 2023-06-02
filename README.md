@@ -35,7 +35,7 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * * STM32F0x
 * * STM32F1x ( [Example](https://github.com/Wiz-IO/wizio-stm/tree/main/examples/TEST-VIRTUAL) )
 * * STM32F4x
-* * TODO etc
+* * STM32WLx
 
 ## UPLOAD
 * STM32 Cube Programmer ( maybe only Windows )
