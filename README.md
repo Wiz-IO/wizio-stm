@@ -39,9 +39,9 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * * STM32WLx
 
 ## UPLOAD
-* STM32 Cube Programmer ( maybe only Windows )
-* STM32 ST-LINK CLI Programmer ( maybe only Windows )
-* STLink @ OpenOCD
+* STM32 Cube Programmer ( by default, maybe only Windows )
+* STM32 ST-LINK CLI Programmer ( stlinkv1, maybe only Windows )
+* STLink @ OpenOCD ( by default )
 * J-LINK ( TODO )
 
 ## DEBUG
