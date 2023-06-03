@@ -22,9 +22,10 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-import sys
+import sys, os, time
 from os.path import join, dirname
 from SCons.Script import (ARGUMENTS, AlwaysBuild, Default, DefaultEnvironment)
+from cube import ImportCube
 
 PLATFORM_NAME  = 'wizio-stm'
 FRAMEWORK_NAME = 'framework-' + PLATFORM_NAME
@@ -33,21 +34,19 @@ env = DefaultEnvironment()
 platform = env.PioPlatform()
 board = env.BoardConfig()
 
+
+def ImportCubeMX(*args, **kwargs):
+   ImportCube(env)
+if os.name == 'nt': 
+   env.AddCustomTarget( "import_cubemx", None, ImportCubeMX, title="Import CubeMX", description="Import files from STM32CubeMX Pproject" )
+
 '''
-def cubemx_config(*args, **kwargs): # TODO
-   print("TODO !!!")
-   if exists( env.subst( join("$PROJECT_DIR", "Inc") ) ):
-      print("Inc exists")
-      # MOVE ALL TO INCLUDE & DELETE
-   if exists( env.subst( join("$PROJECT_DIR", "Src") ) ): # case sensitive !?!
-      print("Src exists")      
+def ini_virtual(*args, **kwargs):
+   print('TODO !!!')
    exit(0)
-env.AddCustomTarget(
-    "config_from_cubemx", None, cubemx_config,
-    title="Config Project from CubeMX",
-    description="blah",
-)
+env.AddCustomTarget( "ini_virtual_template", None, ini_virtual, title="INI Virtual Board", description="Add keys to ini" )
 '''
+
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
 env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )
