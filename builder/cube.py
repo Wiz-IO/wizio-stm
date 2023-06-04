@@ -26,11 +26,12 @@ import sys, os, time
 from os.path import join, exists, normpath, dirname, basename
 from shutil import copyfile
 from platformio import proc, fs
+from colorama import Fore
 
 PYTHON = proc.get_pythonexe_path()
 
 def ERROR(s):
-    print("[ERROR]", s)
+    print(Fore.RED + "[ERROR]", s)
     exit(0) 
 
 def CheckPath( LIST ):
@@ -59,13 +60,14 @@ def ImportCube(env):
         exit(0)
         
     install_python_requirements()
-
+    import win32gui
     from win32com.shell import shell, shellcon
+
     PProject = env.subst('$PROJECT_DIR')  
 
     Cube, display_name, image_list = shell.SHBrowseForFolder (
         win32gui.GetDesktopWindow (), 
-        shell.SHGetFolderLocation (0, shellcon.CSIDL_PERSONAL, 0, 0), # CSIDL_DRIVES
+        shell.SHGetFolderLocation (0, shellcon.CSIDL_DRIVES, 0, 0),
         "Select STM32CubeMX Project", 0, None, None
     )
     if( Cube == None ):
@@ -75,18 +77,19 @@ def ImportCube(env):
     except: 
         ERROR("STM32CubeMX wrong path")
 
-    print('\nPROJECT CONFIG FOR:', CProject)
+    print()
+    print(Fore.GREEN +'[PROJECT] CONFIG:', CProject)
     CheckPath([
         join( PProject, 'include' ),
         join( PProject, 'src' ),
         join( PProject, 'stm' ),    
-        join( PProject, 'platformio.ini' )
-    ])
-    CheckPath([
+        join( PProject, 'platformio.ini' ),
         join( CProject, 'Core', 'Inc' ),
-        join( CProject, 'Core', 'Src' ), 
-    ])    
+        join( CProject, 'Core', 'Src' ),         
+    ])  
 
+    # from /Core/Inc to /include
+    print(Fore.GREEN +'\tPrepare : include')
     R = fs.match_src_files( CProject, ['-<*>', '+<Core/Inc/>'], ['h'] )
     for r in R:
         if 'STM32' in r.upper(): 
@@ -94,6 +97,8 @@ def ImportCube(env):
         else:     
             copyfile( join( CProject, r), join( PProject, 'include', basename(r)) ) 
 
+    # from /Core/Src to /src
+    print(Fore.GREEN +'\tPrepare : src')
     R = fs.match_src_files( CProject, ['-<*>', '+<Core/Src/>'], ['c', 'cpp'] )
     for r in R:
         if 'STM32' in r.upper(): 
@@ -101,17 +106,21 @@ def ImportCube(env):
         else:     
             copyfile( join( CProject, r), join( PProject, 'src', basename(r)) ) 
 
-    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>'], ['ld'] )
+    # LD to /stm
+    print(Fore.GREEN +'\tPrepare : linker sript')
+    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>', '-<Middlewares>'], ['ld'] )
     for r in R:
         if 'STM32' in r.upper(): 
             copyfile( join( CProject, r), join( PProject, 'stm', basename(r)) )     
 
-    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>'], ['s'] )
+    # S to /stm
+    print(Fore.GREEN +'\tPrepare : asm files')
+    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>', '-<Middlewares>'], ['s'] )
     for r in R:
         if 'STM32' in r.upper(): 
             asm = join( PProject, 'stm', basename(r))
             copyfile( join( CProject, r), asm[:-1] + asm[-1].upper() )             
 
-    print('DONE\n')
+    print(Fore.GREEN +'[PROJECT] CONFIG DONE\n')
     time.sleep(.1)
     exit(0)

@@ -40,13 +40,6 @@ def ImportCubeMX(*args, **kwargs):
 if os.name == 'nt': 
    env.AddCustomTarget( "import_cubemx", None, ImportCubeMX, title="Import CubeMX", description="Import files from STM32CubeMX Pproject" )
 
-'''
-def ini_virtual(*args, **kwargs):
-   print('TODO !!!')
-   exit(0)
-env.AddCustomTarget( "ini_virtual_template", None, ini_virtual, title="INI Virtual Board", description="Add keys to ini" )
-'''
-
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
 env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )
@@ -104,5 +97,4 @@ else:
 
 AlwaysBuild( env.Alias("upload", prg, upload_actions) )    
 
-
-
+# print(env.Dump())
