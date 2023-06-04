@@ -17,6 +17,7 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * Move H files from **Inc** to **include**
 * Move C files from **Src** to **src**
 * Drivers and CMSIS **not need** - exist with framework
+* Add function **void _init(void){}** to main.c
 * [Documetnation](https://github.com/Wiz-IO/wizio-stm/wiki/Documentation)
 * [Examples](https://github.com/Wiz-IO/wizio-stm/tree/main/examples)
 * [Framework](https://github.com/Wiz-IO/framework-wizio-stm)
