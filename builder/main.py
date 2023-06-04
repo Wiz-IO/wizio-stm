@@ -26,6 +26,7 @@ import sys, os, time
 from os.path import join, dirname
 from SCons.Script import (ARGUMENTS, AlwaysBuild, Default, DefaultEnvironment)
 from cube import ImportCube
+from mk import MakeFile
 
 PLATFORM_NAME  = 'wizio-stm'
 FRAMEWORK_NAME = 'framework-' + PLATFORM_NAME
@@ -35,11 +36,12 @@ platform = env.PioPlatform()
 board = env.BoardConfig()
 
 
-def ImportCubeMX(*args, **kwargs):
-   ImportCube(env)
+def ImportCubeMX(*args, **kwargs): ImportCube(env)
 if os.name == 'nt': 
    env.AddCustomTarget( "import_cubemx", None, ImportCubeMX, title="Import CubeMX", description="Import files from STM32CubeMX Pproject" )
 
+def Makefile(*args, **kwargs): MakeFile(env)   
+env.AddCustomTarget( "makefile", None, Makefile, title="Generate Makefile", description="Generate Makefile from the Project" )
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
 env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )
