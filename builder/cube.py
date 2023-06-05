@@ -23,6 +23,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
 import sys, os, time
+from os import listdir
 from os.path import join, exists, normpath, dirname, basename
 from shutil import copyfile
 from platformio import proc, fs
@@ -32,7 +33,8 @@ PYTHON = proc.get_pythonexe_path()
 
 def ERROR(s):
     print(Fore.RED + "[ERROR]", s)
-    exit(0) 
+    time.sleep(.1)
+    exit(-1) 
 
 def CheckPath( LIST ):
     for p in LIST:
@@ -53,17 +55,20 @@ def install_python_requirements():
         else:
             ERROR('(PIP) Please, try later')
         print('install_python_requirements' , res['returncode'])
+        exit(0)
 
 def ImportCube(env):
     if os.name != 'nt':
         print('WINDOWS ONLY')
-        exit(0)
+        exit(-1)
         
     install_python_requirements()
     import win32gui
     from win32com.shell import shell, shellcon
 
     PProject = env.subst('$PROJECT_DIR')  
+    if listdir( join( PProject, 'stm' ) ):
+        ERROR("This 'Project/stm' folder is not empty !!!")
 
     Cube, display_name, image_list = shell.SHBrowseForFolder (
         win32gui.GetDesktopWindow (), 
@@ -88,7 +93,7 @@ def ImportCube(env):
         join( CProject, 'Core', 'Src' ),         
     ])  
 
-    # from /Core/Inc to /include
+    # Copy from /Core/Inc to /include
     print(Fore.GREEN +'\tPrepare : include')
     R = fs.match_src_files( CProject, ['-<*>', '+<Core/Inc/>'], ['h'] )
     for r in R:
@@ -97,7 +102,7 @@ def ImportCube(env):
         else:     
             copyfile( join( CProject, r), join( PProject, 'include', basename(r)) ) 
 
-    # from /Core/Src to /src
+    # Copy from /Core/Src to /src
     print(Fore.GREEN +'\tPrepare : src')
     R = fs.match_src_files( CProject, ['-<*>', '+<Core/Src/>'], ['c', 'cpp'] )
     for r in R:
@@ -106,16 +111,16 @@ def ImportCube(env):
         else:     
             copyfile( join( CProject, r), join( PProject, 'src', basename(r)) ) 
 
-    # LD to /stm
+    # Copy LD to /stm
     print(Fore.GREEN +'\tPrepare : linker sript')
-    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>', '-<Middlewares>'], ['ld'] )
+    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>', '-<Middlewares>', '-<Application>'], ['ld'] )
     for r in R:
         if 'STM32' in r.upper(): 
             copyfile( join( CProject, r), join( PProject, 'stm', basename(r)) )     
 
-    # S to /stm
+    # Copy S to /stm
     print(Fore.GREEN +'\tPrepare : asm files')
-    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>', '-<Middlewares>'], ['s'] )
+    R = fs.match_src_files( CProject, ['+<*>', '-<Drivers>', '-<Middlewares>', '-<Application>'], ['s'] )
     for r in R:
         if 'STM32' in r.upper(): 
             asm = join( PProject, 'stm', basename(r))

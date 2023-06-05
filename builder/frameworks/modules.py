@@ -25,9 +25,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import os, hashlib
 from os.path import join, isabs, exists, isdir, basename
 from importlib.machinery import SourceFileLoader
+from colorama import Fore
 
 def PRINT_MODULE_INFO(txt):
-    print('  * %s' % txt)
+    print(Fore.BLUE + '  * %s' % txt)
 
 def dev_module_load(env, module_path, params=''):
     module_path = env.subst( module_path )
@@ -41,7 +42,7 @@ def dev_init_modules(env):
     env['MODULES'] = env.modules_dir = join( env.platform_dir, 'modules')
     lines = env.GetProjectOption('custom_module', None) # INIDOC
     if lines:
-        print('PROJECT MODULES')
+        print(Fore.BLUE + 'MODULES:')
         for line in lines.split('\n'):
             if line == '':
                 continue
@@ -76,3 +77,18 @@ def dev_init_modules(env):
                 dev_module_load(env, module_path, params)
 
 ###############################################################################
+
+def dev_add_source_folder(env):
+    lines = env.GetProjectOption('custom_folder', None) # INIDOC
+    if lines:
+        for line in lines.split('\n'):
+            if line == '': continue
+            line = line.strip().replace('\r', '').replace('\t', '')
+            if False == isabs( line ):
+                line = join( '$PROJECT_DIR', line )
+            line = env.subst( line )
+            if line:
+                env.Append( CPPPATH = [ line ] )
+                env.BuildSources( join('$BUILD_DIR', basename(line)), line )
+            else: 
+                print(Fore.YELLOW + "[WARNNING] Source folder not exixts:", line)
