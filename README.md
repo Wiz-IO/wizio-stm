@@ -26,16 +26,18 @@ _( The project is a work in progress, there may be bugs... please, report )_
 
 ## SUPPORT
 * STM32L051K8U3 
-* STM32L431RBT6 ( not tested as hardware )
-* STM32L431RCY6TR ( not tested as hardware )
+* STM32L431RBT6
+* STM32L431RCY6TR
 * STM32F100RBT6B
 * STM32F100R8T6B
+* STM32F303VCT6
 * **STM32VIRTUAL Board - for ALL chips from this list**  ( [Read WIKI - The STM32VIRTUAL Board](https://github.com/Wiz-IO/wizio-stm/wiki/The-STM32VIRTUAL--Board) )
 * * STM32L0x
 * * STM32L1x
 * * STM32L4x
 * * STM32F0x
 * * STM32F1x ( [Example](https://github.com/Wiz-IO/wizio-stm/tree/main/examples/TEST-VIRTUAL) )
+* * STM32F3x
 * * STM32F4x
 * * STM32WLx
 
