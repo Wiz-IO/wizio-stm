@@ -1,6 +1,13 @@
 import sys, os, time
 from os.path import join, exists, normpath, dirname, basename
 
+def get_gcc(env):
+    pp = env['ENV']['PATH'].split(';')
+    for p in pp:
+        if 'toolchain-gccarmnoneeabi' in p:
+            return p.replace('\\', '/')
+    return '# EDIT GCC PATH'
+
 def MakeFile(env):
     print('TODO - NOT READY YET !!!')
     f = open( join( env.subst('$PROJECT_DIR'), 'Makefile' ), 'w' )
@@ -9,7 +16,7 @@ def MakeFile(env):
 #######################################
 # binaries
 #######################################
-GCC_PATH = %s
+GCC_PATH = "%s"
 PREFIX = arm-none-eabi-
 CC = $(GCC_PATH)/$(PREFIX)gcc
 AS = $(GCC_PATH)/$(PREFIX)gcc -x assembler-with-cpp
@@ -17,30 +24,31 @@ CP = $(GCC_PATH)/$(PREFIX)objcopy
 SZ = $(GCC_PATH)/$(PREFIX)size
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
-''' % '# TODO') ###
-
-
-    f.write('TARGET = # TODO\n') ###
+''' % get_gcc(env))
+    f.write('TARGET = %s\n' % env['PIOENV']) ### ?
     f.write('DEBUG = 1\n')
     f.write('OPT = %s\n' % env.optimization)
     f.write('BUILD_DIR = build\n')
-
     f.write('CPU = ')
     for p in env.CORTEX: f.write(p); f.write(' ')
     f.write('\n' )
-
     f.write('''
 ######################################
-# defines
+# DEFINE
 ######################################
 C_DEFS =  \\
 ''')
-    for p in env['CCFLAGS']:  
+    for p in env['CPPDEFINES']:  
         if type(p) != str: continue
         if p.startswith('-O'): continue
         f.write('-D') 
         f.write(p) 
-        f.write('\\\n')
+        f.write(' \\\n')   
+    for p in env['CCFLAGS']:  
+        if type(p) != str: continue
+        if p.startswith('-O'): continue
+        f.write(p) 
+        f.write(' \\\n')
     f.write('\n')
 
     f.write('''
@@ -50,17 +58,20 @@ C_DEFS =  \\
 AS_INCLUDES = \n
 C_INCLUDES =  \\
 ''')
-    for p in env['CPPPATH']: f.write('-I"' + env.subst(p) + '" \\\n'); 
+    for p in env['CPPPATH']: 
+        if p != "": 
+            f.write('-I"' + env.subst(p) + '" \\\n'); 
     f.write('\n')
 
 
     f.write('''
 ######################################
-# SRC
+# SOURCE
 ######################################
 C_SOURCES = # TODO
 ''')
-    #for p in env['PIOBUILDFILES']: f.write(str(p)); f.write('\n') ... is O files
+    # pfuuu ... there is not list
+    #for p in env['PIOBUILDFILES']: f.write(str(p)); f.write('\n') # ... is O files
     f.write('\n')
 
     f.write('ASM_SOURCES = # TODO')
@@ -128,3 +139,6 @@ clean:
     f.close()
 
     print('DONE')
+
+    # print(env.Dump())
+    print( env['File'] )

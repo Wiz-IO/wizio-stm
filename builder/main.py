@@ -22,11 +22,11 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-import sys, os, time
+import sys, os
+from os import listdir
 from os.path import join, dirname
 from SCons.Script import (ARGUMENTS, AlwaysBuild, Default, DefaultEnvironment)
 from cube import ImportCube
-from mk import MakeFile
 
 PLATFORM_NAME  = 'wizio-stm'
 FRAMEWORK_NAME = 'framework-' + PLATFORM_NAME
@@ -35,13 +35,9 @@ env = DefaultEnvironment()
 platform = env.PioPlatform()
 board = env.BoardConfig()
 
-
 def ImportCubeMX(*args, **kwargs): ImportCube(env)
-if os.name == 'nt': 
-   env.AddCustomTarget( "import_cubemx", None, ImportCubeMX, title="Import CubeMX", description="Import files from STM32CubeMX Pproject" )
-
-def Makefile(*args, **kwargs): MakeFile(env)   
-env.AddCustomTarget( "makefile", None, Makefile, title="Generate Makefile", description="Generate Makefile from the Project" )
+if os.name == 'nt':
+   env.AddCustomTarget( "import_cubemx", None, ImportCubeMX, title="IMPORT CubeMX", description="Import files from STM32CubeMX Pproject" )
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
 env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )

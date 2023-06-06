@@ -126,6 +126,25 @@ def ImportCube(env):
             asm = join( PProject, 'stm', basename(r))
             copyfile( join( CProject, r), asm[:-1] + asm[-1].upper() )             
 
+    board = join( PProject, 'src', 'board.c' )
+    if False == exists( board ):
+        with open(board, 'w') as w:
+            w.write('''/* USER BOARD CONFIG */
+
+void __attribute__((weak)) _init(void) { }      
+
+#if 0 /* for printf */
+int __attribute__((weak)) _write(int file, char *ptr, int len)
+{
+  for (int i = 0; i < len; i++)
+    HAL_UART_Transmit(&huart_x, (const uint8_t *)ptr++, 1, -1);
+  return len;
+  // setvbuf(stdout, NULL, _IONBF, 0); // at uart init
+}
+#endif
+
+''')
+
     print(Fore.GREEN +'[PROJECT] CONFIG DONE\n')
     time.sleep(.1)
     exit(0)
