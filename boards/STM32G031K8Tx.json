@@ -1,0 +1,39 @@
+{
+    "name":         "STM32G031K8Tx",
+    "url":          "https://github.com/Wiz-IO/wizio-stm",
+    "vendor":       "WizIO",
+    
+    "frameworks":   [ "WizIO-STM32-SDK" ],
+  
+    "build": {
+      "div"               : "STM32G0",
+      "sub"               : "%31xx",    
+      "mcu"               : "%31K8Tx",
+      "cor"               : [ "-mcpu=cortex-m0plus", "-mthumb" ],
+      
+      "f_cpu"             : "8000000L"
+    },
+  
+    "debug": {
+      "default_tools": [
+        "stlink"
+      ],
+      "jlink_device": "STM32G031K8Tx",
+      "onboard_tools": [
+        "stlink"
+      ],
+      "openocd_target": "stm32g0",
+      "svd_path": "STM32G031x.svd"
+    },
+  
+    "upload": {
+      "maximum_ram_size"  :  8192,
+      "maximum_size"      : 65536,
+      "protocol": "stlink",
+      "protocols": [
+        "jlink",
+        "stlink"
+      ]    
+    }
+  }
+  

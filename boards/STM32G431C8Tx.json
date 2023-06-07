@@ -1,0 +1,39 @@
+{
+    "name":         "STM32G431C8Tx",
+    "url":          "https://github.com/Wiz-IO/wizio-stm",
+    "vendor":       "WizIO",
+    
+    "frameworks":   [ "WizIO-STM32-SDK" ],
+  
+    "build": {
+      "div"               : "STM32G4",
+      "sub"               : "%31xx",    
+      "mcu"               : "%31C8Tx",
+      "cor"               : [ "-mcpu=cortex-m4", "-mfpu=fpv4-sp-d16", "-mfloat-abi=hard", "-mthumb" ],
+      
+      "f_cpu"             : "8000000L"
+    },
+  
+    "debug": {
+      "default_tools": [
+        "stlink"
+      ],
+      "jlink_device": "STM32G431C8Tx",
+      "onboard_tools": [
+        "stlink"
+      ],
+      "openocd_target": "stm32g4",
+      "svd_path": "STM32G431x.svd"
+    },
+  
+    "upload": {
+      "maximum_ram_size"  : 32768,
+      "maximum_size"      : 65536,
+      "protocol": "stlink",
+      "protocols": [
+        "jlink",
+        "stlink"
+      ]    
+    }
+  }
+  

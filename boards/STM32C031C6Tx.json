@@ -1,0 +1,39 @@
+{
+    "name":         "STM32C031C6Tx",
+    "url":          "https://github.com/Wiz-IO/wizio-stm",
+    "vendor":       "WizIO",
+    
+    "frameworks":   [ "WizIO-STM32-SDK" ],
+  
+    "build": {
+      "div"               : "STM32C0",
+      "sub"               : "%31xx",    
+      "mcu"               : "%31C6Tx",
+      "cor"               : [ "-mcpu=cortex-m0plus", "-mthumb" ],
+      
+      "f_cpu"             : "8000000L"
+    },
+  
+    "debug": {
+      "default_tools": [
+        "stlink"
+      ],
+      "jlink_device": "STM32C031C6Tx",
+      "onboard_tools": [
+        "stlink"
+      ],
+      "openocd_target": "stm32c0",
+      "svd_path": "STM32L031x.svd"
+    },
+  
+    "upload": {
+      "maximum_ram_size"  : 12288,
+      "maximum_size"      : 32768,
+      "protocol": "stlink",
+      "protocols": [
+        "jlink",
+        "stlink"
+      ]    
+    }
+  }
+  
