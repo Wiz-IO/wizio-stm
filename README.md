@@ -31,6 +31,9 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * STM32F100RBT6B
 * STM32F100R8T6B
 * STM32F303VCT6
+* STM32C031C6Tx
+* STM32G031K8Tx
+* STM32G431C8Tx
 * **STM32VIRTUAL Board - for ALL chips from this list**  ( [Read WIKI - The STM32VIRTUAL Board](https://github.com/Wiz-IO/wizio-stm/wiki/The-STM32VIRTUAL--Board) )
 * * STM32L0x
 * * STM32L1x
@@ -39,6 +42,9 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * * STM32F1x ( [Example](https://github.com/Wiz-IO/wizio-stm/tree/main/examples/TEST-VIRTUAL) )
 * * STM32F3x
 * * STM32F4x
+* * STM32C0x
+* * STM32G0x
+* * STM32G4x
 * * STM32WLx
 
 ## UPLOAD
