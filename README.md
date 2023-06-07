@@ -10,7 +10,7 @@ _( The project is a work in progress, there may be bugs... please, report )_
 * Full STLink OpenOCD support
 * Do you need anything else ?!?
 
-## HOW TO
+## [HOW TO](https://www.youtube.com/watch?v=BzYFqrIYYx8)
 * Create STM32CubeMX ( STM32L051K8U3 ) and export to MAKE project
 * Create PlatformIO project ( as example: STM32L051K8U3 ... [boards](https://github.com/Wiz-IO/wizio-stm/tree/main/boards) )
 * Move ALL **stm** files ( that contain "stm" in the filename ) <br>from CubeMX Project **Root**, **Inc** and **Src** to project folder **stm** <br> ( STM32L051K8Ux_FLASH.ld, startup_stm32l051xx.S ...etc )
