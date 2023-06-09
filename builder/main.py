@@ -27,6 +27,7 @@ from os import listdir
 from os.path import join, dirname
 from SCons.Script import (ARGUMENTS, AlwaysBuild, Default, DefaultEnvironment)
 from cube import ImportCube
+from tmp import CreateProject
 
 PLATFORM_NAME  = 'wizio-stm'
 FRAMEWORK_NAME = 'framework-' + PLATFORM_NAME
@@ -38,6 +39,9 @@ board = env.BoardConfig()
 def ImportCubeMX(*args, **kwargs): ImportCube(env)
 if os.name == 'nt':
    env.AddCustomTarget( "import_cubemx", None, ImportCubeMX, title="IMPORT CubeMX", description="Import files from STM32CubeMX Pproject" )
+
+def CreateProjectMX(*args, **kwargs): CreateProject(env)
+env.AddCustomTarget( "create_project", None, CreateProjectMX, title="CREATE Project", description="TODO Create simple project" )
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
 env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )
