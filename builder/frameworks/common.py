@@ -29,7 +29,7 @@ from platformio import proc
 from SCons.Script import Builder
 
 def dev_get_value(env, name, default):
-    res = env.GetProjectOption('custom_%s' % name, # ini user config
+    res = env.GetProjectOption('custom_%s' % name, # ini user config ( ! lower case ! )
             env.BoardConfig().get('build.%s' % name, default) ) # from board
     if res == 'ERROR': 
         print('[ERROR] Cannot find setting', name)
@@ -38,15 +38,15 @@ def dev_get_value(env, name, default):
 
 def dev_uploader(target, source, env): 
     if 'stlinkv1' == env.GetProjectOption("upload_protocol"):
-        APP = dev_get_value(env, 'STM32LC', 'C:/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility/ST-LINK_CLI') # INIDOC
+        APP = dev_get_value(env, 'stm32lc', 'C:/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility/ST-LINK_CLI') # INIDOC
         HEX = env.subst(join('$BUILD_DIR','$PROGNAME')) + '.hex'
         HEX = HEX.replace("\\", "/")
         ARG = [ APP, '-P', HEX, '-V', '-Q', '-Rst' ]  # ? '0x08000000'
     else:
-        APP = dev_get_value(env, 'STM32CP', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
+        APP = dev_get_value(env, 'stm32cp', 'C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI') # INIDOC
         ELF = env.subst(join('$BUILD_DIR','$PROGNAME')) + '.elf'
         ELF = ELF.replace("\\", "/")
-        ARG = [ APP, '-c', 'port=SWD', 'freq=4000', '-w', ELF, '--start', '-q' ]    
+        ARG = [ APP, '-c', 'port=SWD', 'freq=4000', '-w', ELF, '--start', '-q' ]
     proc.exec_command( ARG, stdout = sys.stdout )
     # {'out': None, 'err': None, 'returncode': 0}   
    
