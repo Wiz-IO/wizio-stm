@@ -21,9 +21,9 @@
 #include "swTimer.h"
 
 #ifdef CM4F
-#define WOS_REG_CNT (16 + 17)
+#define WOS_REGISTERS (16 + 17)
 #else
-#define WOS_REG_CNT (16)
+#define WOS_REGISTERS (16)
 #endif
 
 typedef enum
@@ -53,7 +53,7 @@ typedef struct wos_task_s
     volatile uint32_t sp;        // must be first
     void (*entry)(void *params); // task entry
     void *params;                // task params
-    int events;
+    int event;
     wos_task_status_e status;
     void *next;
 } wos_task_t;
@@ -71,8 +71,6 @@ static struct
     wos_state_e state;
     uint32_t ticks;
 } wos = {0};
-
-void wos_load(); // link 'wos_pend.S' if this is library
 
 static void wos_task_end(void)
 {
@@ -93,7 +91,7 @@ static void *wos_task_construct(void (*entry)(void *params), void *params, uint3
             // task->status = WOS_TASK_STATUS_IDLE; // = 0
             task->entry = entry;
             task->params = params;
-            task->sp = (uint32_t)(stack + offset - WOS_REG_CNT);
+            task->sp = (uint32_t)(stack + offset - WOS_REGISTERS);
             stack[offset - 1] = 0x01000000;              // XPSR
             stack[offset - 2] = (uint32_t)entry & ~1UL;  // PC
             stack[offset - 3] = (uint32_t)&wos_task_end; // LR
@@ -123,7 +121,7 @@ static void *wos_task_construct(void (*entry)(void *params), void *params, uint3
 static void wos_timers_entry(void *params);
 int wos_init(void *params)
 {
-    wos_load();
+    wos_dumy();
 #ifdef WOS_CONFIG_TIMERS
     static uint32_t stack[WOS_CONFIG_MINIMAL_STACK_SIZE];
     wos.timer = wos_task_construct(wos_timers_entry, params, stack, sizeof(stack), false);
@@ -136,7 +134,7 @@ int wos_init(void *params)
 void *wos_task_create(void (*entry)(void *params), void *params, uint32_t *stack, size_t size)
 {
     wos_task_t *task = NULL;
-    if ((WOS_STATE_INITIALIZED == wos.state) && entry && size && (size % sizeof(uint32_t) == 0) && size > WOS_REG_CNT)
+    if ((WOS_STATE_INITIALIZED == wos.state) && entry && size && (size % sizeof(uint32_t) == 0) && size > WOS_REGISTERS)
     {
         task = (stack) ? wos_task_construct(entry, params, stack, size, true) : wos_task_construct(entry, params, (uint32_t *)malloc(size), size, true);
     }
@@ -165,8 +163,8 @@ void wos_start(void)
 
         __enable_irq();
 
-        __set_PSP(wos_curr_task->sp + (WOS_REG_CNT * sizeof(uint32_t))); // Set PSP to the top of task stack
-        __set_CONTROL(0x03);                                             // Switch to Unprivilleged Thread Mode with PSP
+        __set_PSP(wos_curr_task->sp + (WOS_REGISTERS * sizeof(uint32_t))); // Set PSP to the top of task stack
+        __set_CONTROL(0x03);                                               // Switch to Unprivilleged Thread Mode with PSP
         __ISB();
 
         wos_curr_task->entry(wos_curr_task->params);
@@ -181,10 +179,9 @@ void wos_delay(uint32_t ms)
         if (ms)
         {
             wos_curr_task->status = WOS_TASK_STATUS_BLOCKED;
-            uint32_t t = HAL_GetTick();
-            while (HAL_GetTick() - t < ms)
+            uint32_t begin = HAL_GetTick();
+            while (HAL_GetTick() - begin < ms)
             {
-                HAL_Delay(1);
                 wos_yield();
             }
             wos_curr_task->status = WOS_TASK_STATUS_ACTIVE;
@@ -279,7 +276,7 @@ static void SVC(int number)
     }
 }
 
-void SVC_Handler_Main(unsigned int *svc_args)
+void SVC_Handler_Main(uint32_t *svc_args)
 {
     SVC(((char *)svc_args[6])[-2]);
 }
@@ -327,6 +324,7 @@ void SysTick_Handler(void)
 }
 
 // TIMERS /////////////////////////////////////////////////////////////////////
+
 #ifdef WOS_CONFIG_TIMERS
 
 static void wos_timers_entry(void *params)
@@ -402,22 +400,23 @@ int wos_timer_started(void *handle)
 
 #endif
 
-/////////////////////////////////////
-// From here on down is untested   //
-/////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//      From here on down is untested and are subject to change              //
+///////////////////////////////////////////////////////////////////////////////
 
 // EVENTS /////////////////////////////////////////////////////////////////////
+
 #ifdef WOS_CONFIG_EVENTS
 
 int wos_event_get_value(void *handle, bool clear)
 {
     int res = -1;
-    if (handle)
+    if (handle && wos.state > WOS_STATE_INITIALIZED)
     {
         __disable_irq();
-        res = ((wos_task_t *)handle)->events;
+        res = ((wos_task_t *)handle)->event;
         if (clear)
-            ((wos_task_t *)handle)->events = 0;
+            ((wos_task_t *)handle)->event = 0;
         __enable_irq();
     }
     return res;
@@ -426,53 +425,53 @@ int wos_event_get_value(void *handle, bool clear)
 int wos_event_set_value(void *handle, int event)
 {
     int res = -1;
-    if (handle)
+    if (handle && wos.state > WOS_STATE_INITIALIZED)
     {
         __disable_irq();
-        ((wos_task_t *)handle)->events = event;
+        ((wos_task_t *)handle)->event = event;
         __enable_irq();
         res = 0;
     }
     return res;
 }
 
-int wos_event_get_value_wait(void *handle, uint32_t delay, bool clear)
+int wos_event_get_value_wait(void *handle, uint32_t delay, bool clear) // if not zero
 {
-    int res = -1; // error
+    int res = -1;
     uint32_t t = HAL_GetTick();
     do
     {
         if ((res = wos_event_get_value(handle, clear)))
             return res;
-        HAL_Delay(1);
         wos_yield();
     } while (HAL_GetTick() - t < delay);
-    res = -2; // timeout
     return res;
 }
 
-int wos_event_set_value_wait(void *handle, uint32_t delay, int event) // only if is zero
+int wos_event_set_value_wait(void *handle, uint32_t delay, int event) // if is zero
 {
-    int res = -1; // error
-    uint32_t t = HAL_GetTick();
+    int res = -1;
+    uint32_t begin = HAL_GetTick();
     do
     {
         if (0 == wos_event_get_value(handle, false))
             return wos_event_set_value(handle, event);
-        HAL_Delay(1);
         wos_yield();
-    } while (HAL_GetTick() - t < delay);
-    res = -2; // timeout
+    } while (HAL_GetTick() - begin < delay);
     return res;
 }
+
+// TODO BITS
 
 #endif
 
 // MUTEX //////////////////////////////////////////////////////////////////////
+
 typedef struct
 {
     void *owner;
-    int value;
+    uint32_t value;
+    uint32_t count;
 } sem_t;
 
 #ifdef WOS_CONFIG_MUTEX
@@ -487,21 +486,24 @@ int wos_mutex_take(void *handle, uint32_t ms)
     if (handle && wos.state > WOS_STATE_INITIALIZED)
     {
         sem_t *h = (sem_t *)handle;
-        uint32_t begin = HAL_GetTick();
-        do
+        if (0 == h->count) // mutex ?
         {
-            if (0 == h->value)
+            uint32_t begin = HAL_GetTick();
+            do
             {
-                __disable_irq();
-                h->value = (int)(h->owner = (void *)wos_curr_task);
-                __enable_irq();
-                return 0; // ok
-            }
-            HAL_Delay(1);
-            wos_yield();
-        } while (HAL_GetTick() - begin < ms);
+                if (0 == h->value)
+                {
+                    __disable_irq();
+                    h->value = (uint32_t)(h->owner = (void *)wos_curr_task);
+                    __enable_irq();
+                    return 0; // ok
+                }
+                HAL_Delay(1);
+                wos_yield();
+            } while (HAL_GetTick() - begin < ms);
+        }
     }
-    return -1; // error
+    return -1;
 }
 
 int wos_mutex_give(void *handle)
@@ -509,14 +511,14 @@ int wos_mutex_give(void *handle)
     if (handle && wos.state > WOS_STATE_INITIALIZED)
     {
         sem_t *h = (sem_t *)handle;
-        if (h->value)
+        if (0 == h->count) // mutex
         {
-            if ((h->owner == wos_curr_task) && (h->owner == h->value))
+            if (h->value && (h->owner == wos_curr_task) && (h->owner == h->value))
             {
                 __disable_irq();
                 memset(handle, 0, sizeof(sem_t));
                 __enable_irq();
-                EXC_RETURN_HANDLER_FPU 0;
+                return 0;
             }
         }
     }
@@ -526,3 +528,70 @@ int wos_mutex_give(void *handle)
 #endif
 
 // SEMAPHORE //////////////////////////////////////////////////////////////////
+
+#ifdef WOS_CONFIG_SEMAPHORE
+
+void *wos_sem_create(uint32_t count)
+{
+    sem_t *h = (sem_t *)calloc(sizeof(sem_t), 1);
+    if (h)
+        h->value = h->count = count ? count : 1;
+    return h;
+}
+
+int wos_sem_take(void *handle, uint32_t ms)
+{
+    if (handle && wos.state > WOS_STATE_INITIALIZED)
+    {
+        sem_t *h = (sem_t *)handle;
+        if (h->count) // mutex ?
+        {
+            // if (h->owner == wos_curr_task) return 0; // recursive ???
+
+            if (0 == h->value) // block
+            {
+                uint32_t begin = HAL_GetTick();
+                do
+                {
+                    if (h->value)
+                        goto done;
+                    wos_yield();
+                } while (HAL_GetTick() - begin < ms);
+            }
+            else
+            {
+            done:
+                __disable_irq();
+                h->owner == wos_curr_task;
+                h->value--;
+                __enable_irq();
+                return 0;
+            }
+        }
+    }
+    return -1;
+}
+
+int wos_sem_give(void *handle)
+{
+    if (handle && wos.state > WOS_STATE_INITIALIZED)
+    {
+        sem_t *h = (sem_t *)handle;
+        if (h->count) // mutex ?
+        {
+            // if (h->owner == wos_curr_task) return 0; // recursive ???
+
+            if (h->value < h->count)
+            {
+                __disable_irq();
+                h->value++;
+                h->owner == wos_curr_task;
+                __enable_irq();
+                return 0;
+            }
+        }
+    }
+    return -1;
+}
+
+#endif

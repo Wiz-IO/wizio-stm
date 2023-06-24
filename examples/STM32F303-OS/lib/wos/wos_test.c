@@ -1,3 +1,18 @@
+/**
+ ******************************************************************************
+ *
+ * Copyright (c) 2023 WizIO.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ *   TEST BOARD: https://www.st.com/en/evaluation-tools/stm32f3discovery.html
+ *
+ ******************************************************************************
+ */
+
 #include <stdio.h>
 #include "wos.h"
 
@@ -15,18 +30,9 @@ static void entry(void *params)
     while (1)
     {
         HAL_GPIO_TogglePin(GPIOE, 1 << p);
-        //wos_delay(100);
+        // wos_delay(100);
         HAL_Delay(100);
         wos_yield();
-    }
-}
-
-void ms_cb(void)
-{
-    for (int i = 8; i < 16; i++)
-    {
-        HAL_GPIO_TogglePin(GPIOE, 1 << i);
-        HAL_Delay(100);
     }
 }
 

@@ -16,6 +16,8 @@
 #include <stdbool.h>
 #include "wos_config.h"
 
+void wos_dumy(); // link 'wos_pend.S' if this is library
+
 int wos_init(void *);
 void wos_start(void);
 void wos_suspend(void);
@@ -44,3 +46,7 @@ int wos_event_set_value_wait(void *handle, uint32_t delay, int event);
 void *wos_mutex_create(void);
 int wos_mutex_take(void *handle, uint32_t ms);
 int wos_mutex_give(void *handle);
+
+void *wos_sem_create(uint32_t count);
+int wos_sem_take(void *handle, uint32_t ms);
+int wos_sem_give(void *handle);
