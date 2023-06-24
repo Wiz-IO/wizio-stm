@@ -34,11 +34,11 @@ PendSV_Handler:
 	subs	r0, #16
 #endif  
 
-  ldr r2, =os_curr_task /* Save current task SP */
+  ldr r2, =wos_curr_task /* Save current task SP */
   ldr r1, [r2]
   str r0, [r1]
 
-  bl os_switch
+  bl wos_switch 
   ldr r0, [r0]
 
 #ifdef CM4F
@@ -61,7 +61,7 @@ PendSV_Handler:
   bx r0
 
 
-.global os_load
-.type os_load, %function
-os_load: // private  void os_load();
+.global wos_load
+.type wos_load, %function
+wos_load: // private  void wos_load();
   BX LR

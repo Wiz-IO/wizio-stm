@@ -15,9 +15,9 @@ static void entry(void *params)
     while (1)
     {
         HAL_GPIO_TogglePin(GPIOE, 1 << p);
-        //os_delay(100);
+        //wos_delay(100);
         HAL_Delay(100);
-        os_yield();
+        wos_yield();
     }
 }
 
@@ -30,12 +30,12 @@ void ms_cb(void)
     }
 }
 
-void os_test(void)
+void wos_test(void)
 {
-    os_init(0);
+    wos_init(0);
     for (int i = 1; i < 8; i++)
-        handles[i] = os_task_create(&entry, (void *)(i + 8), NULL, OS_CONFIG_MINIMAL_STACK_SIZE * 4);
-    void *tmr = os_timer_create(100, OS_TIMER_PERIODIC, timer_callback, NULL);
-    os_timer_start(tmr);
-    os_start();
+        handles[i] = wos_task_create(&entry, (void *)(i + 8), NULL, WOS_CONFIG_MINIMAL_STACK_SIZE * 4);
+    void *tmr = wos_timer_create(100, WOS_TIMER_PERIODIC, timer_callback, NULL);
+    wos_timer_start(tmr);
+    wos_start();
 }

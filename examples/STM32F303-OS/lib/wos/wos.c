@@ -8,37 +8,39 @@
  * in the root directory of this software component.
  * If no LICENSE file comes with this software, it is provided AS-IS.
  *
+ *      TEST/DEDUG Version ( there may be bugs )
+ *
  ******************************************************************************
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+#include <assert.h> // TODO: find short solution
 #include "wos.h"
 #include "swTimer.h"
 
 #ifdef CM4F
-#define OS_REG_CNT (16 + 17)
+#define WOS_REG_CNT (16 + 17)
 #else
-#define OS_REG_CNT (16)
+#define WOS_REG_CNT (16)
 #endif
 
 typedef enum
 {
-    OS_TASK_STATUS_IDLE = 0,
-    OS_TASK_STATUS_ACTIVE,
-    OS_TASK_STATUS_BLOCKED,
-    OS_TASK_STATUS_SUSPEND
-} os_task_status_e;
+    WOS_TASK_STATUS_IDLE = 0,
+    WOS_TASK_STATUS_ACTIVE,
+    WOS_TASK_STATUS_BLOCKED,
+    WOS_TASK_STATUS_SUSPEND
+} wos_task_status_e;
 
 typedef enum
 {
-    OS_STATE_DEFAULT = 0,
-    OS_STATE_INITIALIZED,
-    OS_STATE_STARTED,
-    OS_STATE_STOPPED
-} os_state_e;
+    WOS_STATE_DEFAULT = 0,
+    WOS_STATE_INITIALIZED,
+    WOS_STATE_STARTED,
+    WOS_STATE_STOPPED
+} wos_state_e;
 
 typedef struct node_s
 {
@@ -46,105 +48,105 @@ typedef struct node_s
     struct node_s *next;
 } node_t;
 
-typedef struct os_task_s
+typedef struct wos_task_s
 {
-    volatile uint32_t sp; // must be first
-    void (*entry)(void *params);
-    void *params;
-    os_task_status_e status;
+    volatile uint32_t sp;        // must be first
+    void (*entry)(void *params); // task entry
+    void *params;                // task params
     int events;
+    wos_task_status_e status;
     void *next;
-} os_task_t;
+} wos_task_t;
 
-volatile os_task_t *os_curr_task = NULL;
-volatile os_task_t *os_next_task = NULL;
+volatile wos_task_t *wos_curr_task = NULL;
+volatile wos_task_t *wos_next_task = NULL;
 
 static struct
 {
-    os_task_t *list;
-    int count; // tasks in list
-#ifdef OS_CONFIG_TIMERS
-    os_task_t *timer;
+    wos_task_t *list;
+    int count; // list
+#ifdef WOS_CONFIG_TIMERS
+    wos_task_t *timer;
 #endif
-    os_state_e state;
+    wos_state_e state;
     uint32_t ticks;
-} os = {0};
+} wos = {0};
 
-void os_load();
+void wos_load(); // link 'wos_pend.S' if this is library
 
-static void task_end(void)
+static void wos_task_end(void)
 {
     int i = 0;
     while (1)
         i++;
 }
 
-static void *os_task_construct(void (*entry)(void *params), void *params, uint32_t *stack, size_t size, bool add)
+static void *wos_task_construct(void (*entry)(void *params), void *params, uint32_t *stack, size_t size, bool add)
 {
-    os_task_t *task = NULL;
+    wos_task_t *task = NULL;
     if (entry && stack && size)
     {
-        task = (os_task_t *)calloc(sizeof(os_task_t), 1);
+        task = (wos_task_t *)calloc(sizeof(wos_task_t), 1);
         if (task)
         {
             uint32_t offset = (size / sizeof(uint32_t));
-            // task->status = OS_TASK_STATUS_IDLE; // = 0
+            // task->status = WOS_TASK_STATUS_IDLE; // = 0
             task->entry = entry;
             task->params = params;
-            task->sp = (uint32_t)(stack + offset - OS_REG_CNT);
-            stack[offset - 1] = 0x01000000;             // XPSR
-            stack[offset - 2] = (uint32_t)entry & ~1UL; // PC
-            stack[offset - 3] = (uint32_t)&task_end;    // LR
-            stack[offset - 8] = (uint32_t)params;       // R0
+            task->sp = (uint32_t)(stack + offset - WOS_REG_CNT);
+            stack[offset - 1] = 0x01000000;              // XPSR
+            stack[offset - 2] = (uint32_t)entry & ~1UL;  // PC
+            stack[offset - 3] = (uint32_t)&wos_task_end; // LR
+            stack[offset - 8] = (uint32_t)params;        // R0
             if (add)
             {
-                if (os.list)
+                __disable_irq();
+                if (wos.list)
                 {
-                    volatile os_task_t *p = os.list;
-                    __disable_irq();
+                    volatile wos_task_t *p = wos.list;
                     while (p->next)
                         p = p->next;
-                    p->next = task;
-                    __enable_irq();
+                    p->next = task; // append task
                 }
                 else
                 {
-                    os.list = task;
+                    wos.list = task;
                 }
-                os.count++;
+                wos.count++;
+                __enable_irq();
             }
         }
     }
     return task;
 }
 
-int os_init(void *params)
+static void wos_timers_entry(void *params);
+int wos_init(void *params)
 {
-#ifdef OS_CONFIG_TIMERS
-    void os_timers_entry(void *params);
-    static uint32_t stack[OS_CONFIG_MINIMAL_STACK_SIZE];
-    os.timer = os_task_construct(os_timers_entry, params, stack, sizeof(stack), false);
-    assert(os.timer);
+    wos_load();
+#ifdef WOS_CONFIG_TIMERS
+    static uint32_t stack[WOS_CONFIG_MINIMAL_STACK_SIZE];
+    wos.timer = wos_task_construct(wos_timers_entry, params, stack, sizeof(stack), false);
+    assert(wos.timer);
 #endif
-    os_load();
-    os.state = OS_STATE_INITIALIZED;
+    wos.state = WOS_STATE_INITIALIZED;
     return 0;
 }
 
-void *os_task_create(void (*entry)(void *params), void *params, uint32_t *stack, size_t size)
+void *wos_task_create(void (*entry)(void *params), void *params, uint32_t *stack, size_t size)
 {
-    os_task_t *task = NULL;
-    if ((OS_STATE_INITIALIZED == os.state) && entry && size && (size % sizeof(uint32_t) == 0) && size > OS_REG_CNT)
+    wos_task_t *task = NULL;
+    if ((WOS_STATE_INITIALIZED == wos.state) && entry && size && (size % sizeof(uint32_t) == 0) && size > WOS_REG_CNT)
     {
-        task = (stack) ? os_task_construct(entry, params, stack, size, true) : os_task_construct(entry, params, (uint32_t *)malloc(size), size, true);
+        task = (stack) ? wos_task_construct(entry, params, stack, size, true) : wos_task_construct(entry, params, (uint32_t *)malloc(size), size, true);
     }
     return task;
 }
 
-void os_start(void)
+void wos_start(void)
 {
-    assert(os.list);
-    assert(OS_STATE_INITIALIZED == os.state);
+    assert(wos.list);
+    assert(WOS_STATE_INITIALIZED == wos.state);
     {
         __disable_irq();
 
@@ -152,43 +154,44 @@ void os_start(void)
         NVIC_SetPriority(SVCall_IRQn, 0x00);  // Highest possible priority
         NVIC_SetPriority(SysTick_IRQn, 0x00); // Highest possible priority
 
-        os_curr_task = os.list; // First task
+        wos_curr_task = wos.list; // First task
 
-        volatile os_task_t *p = os.list;
+        volatile wos_task_t *p = wos.list;
         while (p->next)
             p = p->next;
-        p->next = os.list; // connect the list
+        p->next = wos.list; // connect the list
 
-        os.state = OS_STATE_STARTED;
+        wos.state = WOS_STATE_STARTED;
+
         __enable_irq();
 
-        __set_PSP(os_curr_task->sp + (OS_REG_CNT * sizeof(uint32_t))); // Set PSP to the top of task stack
-        __set_CONTROL(0x03);                                           // Switch to Unprivilleged Thread Mode with PSP
+        __set_PSP(wos_curr_task->sp + (WOS_REG_CNT * sizeof(uint32_t))); // Set PSP to the top of task stack
+        __set_CONTROL(0x03);                                             // Switch to Unprivilleged Thread Mode with PSP
         __ISB();
 
-        os_curr_task->entry(os_curr_task->params);
+        wos_curr_task->entry(wos_curr_task->params);
     }
     assert(0);
 }
 
-void os_delay(uint32_t ms)
+void wos_delay(uint32_t ms)
 {
-    if (os.state > OS_STATE_INITIALIZED)
+    if (wos.state > WOS_STATE_INITIALIZED)
     {
         if (ms)
         {
-            os_curr_task->status = OS_TASK_STATUS_BLOCKED;
+            wos_curr_task->status = WOS_TASK_STATUS_BLOCKED;
             uint32_t t = HAL_GetTick();
             while (HAL_GetTick() - t < ms)
             {
                 HAL_Delay(1);
-                os_yield();
+                wos_yield();
             }
-            os_curr_task->status = OS_TASK_STATUS_ACTIVE;
+            wos_curr_task->status = WOS_TASK_STATUS_ACTIVE;
         }
         else
         {
-            os_yield();
+            wos_yield();
         }
     }
     else
@@ -197,47 +200,47 @@ void os_delay(uint32_t ms)
     }
 }
 
-void os_suspend(void) { os.state = OS_STATE_STOPPED; }
+void wos_suspend(void) { wos.state = WOS_STATE_STOPPED; }
 
-void os_resume(void) { os.state = OS_STATE_STARTED; }
+void wos_resume(void) { wos.state = WOS_STATE_STARTED; }
 
-void os_task_suspend(void *handle)
+void wos_task_suspend(void *handle)
 {
-#ifdef OS_CONFIG_TIMERS
-    if (os_curr_task == os.timer)
+#ifdef WOS_CONFIG_TIMERS
+    if (wos_curr_task == wos.timer)
         return;
 #endif
     if (handle)
-        ((os_task_t *)handle)->status = OS_TASK_STATUS_SUSPEND;
+        ((wos_task_t *)handle)->status = WOS_TASK_STATUS_SUSPEND;
     else
-        os_curr_task->status = OS_TASK_STATUS_SUSPEND;
+        wos_curr_task->status = WOS_TASK_STATUS_SUSPEND;
 }
 
-void os_task_resume(void *handle)
+void wos_task_resume(void *handle)
 {
     if (handle)
-        ((os_task_t *)handle)->status = OS_TASK_STATUS_IDLE;
+        ((wos_task_t *)handle)->status = WOS_TASK_STATUS_IDLE;
     else
-        os_curr_task->status = OS_TASK_STATUS_ACTIVE;
+        wos_curr_task->status = WOS_TASK_STATUS_ACTIVE;
 }
 
-void *os_task_handle(void) { return (void *)os_curr_task; }
+void *wos_task_handle(void) { return (void *)wos_curr_task; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-volatile void *os_switch(void)
+volatile void *wos_switch(void)
 {
-    os_curr_task->status = OS_TASK_STATUS_IDLE;
-    os_next_task->status = OS_TASK_STATUS_ACTIVE;
-    return (os_curr_task = os_next_task);
+    wos_curr_task->status = WOS_TASK_STATUS_IDLE;
+    wos_next_task->status = WOS_TASK_STATUS_ACTIVE;
+    return (wos_curr_task = wos_next_task);
 }
 
-static os_task_t *os_next(void)
+static wos_task_t *wos_next(void)
 {
-    os_task_t *p = os_curr_task->next;
-    for (int i = 0; i < os.count; i++)
+    wos_task_t *p = wos_curr_task->next;
+    for (int i = 0; i < wos.count; i++)
     {
-        if (p->status == OS_TASK_STATUS_IDLE)
+        if (p->status == WOS_TASK_STATUS_IDLE)
             break;
         p = p->next;
     }
@@ -246,24 +249,24 @@ static os_task_t *os_next(void)
 
 static void SVC(int number)
 {
-    if (OS_STATE_STARTED == os.state)
+    if (WOS_STATE_STARTED == wos.state)
     {
         switch (number)
         {
         case 0: // yield
-            os_next_task = os_next();
+            wos_next_task = wos_next();
             break;
 
-#ifdef OS_CONFIG_TIMERS
-        case 1:
-            if (os_curr_task == os.timer)
+#ifdef WOS_CONFIG_TIMERS
+        case 1: // from task to timers
+            if (wos_curr_task == wos.timer)
                 return;
-            os.timer->next = (os_task_t *)os_curr_task;
-            os_next_task = os.timer;
+            wos.timer->next = (wos_task_t *)wos_curr_task;
+            wos_next_task = wos.timer;
             break;
 
-        case 2:
-            os_next_task = os.timer->next; // return to task
+        case 2: // from timers to task
+            wos_next_task = wos.timer->next;
             break;
 #endif
 
@@ -271,7 +274,7 @@ static void SVC(int number)
             return;
         }
 
-        if (os_next_task)
+        if (wos_next_task)
             SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk; // Trigger PendSV which performs the actual context switch
     }
 }
@@ -283,15 +286,15 @@ void SVC_Handler_Main(unsigned int *svc_args)
 
 void SVC_Handler(void)
 {
-    __asm(".global SVC_Handler_Main	\n"
-          "TST lr, #4				\n"
-          "ITE EQ					\n"
-          "MRSEQ r0, MSP			\n"
-          "MRSNE r0, PSP			\n"
-          "B SVC_Handler_Main		\n");
+    __asm(".global SVC_Handler_Main \n"
+          "TST lr, #4               \n"
+          "ITE EQ                   \n"
+          "MRSEQ r0, MSP            \n"
+          "MRSNE r0, PSP            \n"
+          "B SVC_Handler_Main       \n");
 }
 
-#ifdef OS_CONFIG_PREEMPTION
+#ifdef WOS_CONFIG_PREEMPTION
 static bool preemption = 0;
 #endif
 
@@ -299,24 +302,24 @@ void SysTick_Handler(void)
 {
     HAL_IncTick();
 
-#ifdef OS_CONFIG_SWITCH_TIME
-#if OS_CONFIG_SWITCH_TIME > 1
-    if (++os.ticks % OS_CONFIG_SWITCH_TIME == 0)
+#ifdef WOS_CONFIG_SWITCH_TIME
+#if WOS_CONFIG_SWITCH_TIME > 1
+    if (++wos.ticks % WOS_CONFIG_SWITCH_TIME == 0)
 #endif
 #endif
     {
-        if (OS_STATE_STARTED == os.state)
+        if (WOS_STATE_STARTED == wos.state)
         {
-#ifdef OS_CONFIG_PREEMPTION
-#ifdef OS_CONFIG_TIMERS
+#ifdef WOS_CONFIG_PREEMPTION
+#ifdef WOS_CONFIG_TIMERS
             SVC(preemption);
             preemption = !preemption;
 #else
-            SVC(0); /* only tasks */
+            SVC(0);
 #endif
-#else
-#ifdef OS_CONFIG_TIMERS
-            SVC(1); /* timer */
+#else // NO WOS_CONFIG_PREEMPTION
+#ifdef WOS_CONFIG_TIMERS
+            SVC(1);
 #endif
 #endif
         }
@@ -324,64 +327,55 @@ void SysTick_Handler(void)
 }
 
 // TIMERS /////////////////////////////////////////////////////////////////////
-#ifdef OS_CONFIG_TIMERS
+#ifdef WOS_CONFIG_TIMERS
 
-void os_timers_entry(void *params)
+static void wos_timers_entry(void *params)
 {
     while (1)
     {
-        os.state = OS_STATE_STOPPED;
-        swTimerTaskHandler();
+        wos.state = WOS_STATE_STOPPED;
+        swTimerTaskHandler(); // check all timers
         if (params)
             ((void (*)(void))params)();
-        os.state = OS_STATE_STARTED;
+        wos.state = WOS_STATE_STARTED;
         asm volatile("svc #2"); // return to the tasks
     }
 }
 
-static void task_timers_handler(void *params)
-{
-    while (1)
-    {
-        swTimerTaskHandler();   // check timers
-        asm volatile("svc #2"); // return to current task
-    }
-}
-
-static void timer_cb(struct swTimer_t *timer)
+static void wos_timer_cb(struct swTimer_t *timer)
 {
     if (timer)
         if (timer->callback)
             timer->callback(timer->user);
 }
 
-void os_timer_free(void *handle)
+void wos_timer_free(void *handle)
 {
     if (handle)
     {
-        os_timer_stop(handle);
+        wos_timer_stop(handle);
         free(handle);
     }
 }
 
-void *os_timer_create(uint32_t interval, bool mode, void (*callback)(void *user), void *user)
+void *wos_timer_create(uint32_t interval, bool mode, void (*user_callback)(void *), void *user_params)
 {
     swTimer_t *p = NULL;
-    if (interval && callback)
+    if (interval && user_callback)
     {
         if ((p = calloc(sizeof(swTimer_t), 1)))
         {
             p->interval = interval;
             p->mode = (swTimerMode_t)mode;
-            p->user = user;
-            p->callback = callback;
-            p->cb = timer_cb;
+            p->user = user_params;
+            p->callback = user_callback;
+            p->cb = wos_timer_cb;
         }
     }
     return p;
 }
 
-int os_timer_start(void *handle)
+int wos_timer_start(void *handle)
 {
     if (handle)
     {
@@ -391,7 +385,7 @@ int os_timer_start(void *handle)
     return -1;
 }
 
-int os_timer_stop(void *handle)
+int wos_timer_stop(void *handle)
 {
     if (handle)
     {
@@ -401,68 +395,72 @@ int os_timer_stop(void *handle)
     return -1;
 }
 
-int os_timer_started(void *handle)
+int wos_timer_started(void *handle)
 {
     return (handle) ? swTimerStarted((swTimer_t *)handle) : -1;
 }
 
 #endif
 
-// EVENTS /////////////////////////////////////////////////////////////////////
-#ifdef OS_CONFIG_EVENTS
+/////////////////////////////////////
+// From here on down is untested   //
+/////////////////////////////////////
 
-int os_event_get(void *handle, bool clear)
+// EVENTS /////////////////////////////////////////////////////////////////////
+#ifdef WOS_CONFIG_EVENTS
+
+int wos_event_get_value(void *handle, bool clear)
 {
     int res = -1;
     if (handle)
     {
         __disable_irq();
-        res = ((os_task_t *)handle)->events;
+        res = ((wos_task_t *)handle)->events;
         if (clear)
-            ((os_task_t *)handle)->events = 0;
+            ((wos_task_t *)handle)->events = 0;
         __enable_irq();
     }
     return res;
 }
 
-int os_event_set(void *handle, int event)
+int wos_event_set_value(void *handle, int event)
 {
     int res = -1;
     if (handle)
     {
         __disable_irq();
-        ((os_task_t *)handle)->events = event;
+        ((wos_task_t *)handle)->events = event;
         __enable_irq();
         res = 0;
     }
     return res;
 }
 
-int os_event_get_wait(void *handle, uint32_t delay, bool clear)
+int wos_event_get_value_wait(void *handle, uint32_t delay, bool clear)
 {
     int res = -1; // error
     uint32_t t = HAL_GetTick();
     do
     {
-        if ((res = os_event_get(handle, clear)))
+        if ((res = wos_event_get_value(handle, clear)))
             return res;
         HAL_Delay(1);
-        os_yield();
+        wos_yield();
     } while (HAL_GetTick() - t < delay);
     res = -2; // timeout
     return res;
 }
 
-int os_event_set_wait(void *handle, uint32_t delay, int event)
+int wos_event_set_value_wait(void *handle, uint32_t delay, int event) // only if is zero
 {
     int res = -1; // error
     uint32_t t = HAL_GetTick();
     do
     {
-        if (0 == os_event_get(handle, false))
-            return os_event_set(handle, event);
+        if (0 == wos_event_get_value(handle, false))
+            return wos_event_set_value(handle, event);
         HAL_Delay(1);
-        os_yield();
+        wos_yield();
     } while (HAL_GetTick() - t < delay);
     res = -2; // timeout
     return res;
@@ -474,49 +472,51 @@ int os_event_set_wait(void *handle, uint32_t delay, int event)
 typedef struct
 {
     void *owner;
-    int val;
+    int value;
 } sem_t;
 
-#ifdef OS_CONFIG_MUTEX
+#ifdef WOS_CONFIG_MUTEX
 
-void *os_mutex_create(void)
+void *wos_mutex_create(void)
 {
-    return calloc(sizeof(uint32_t), 1);
+    return calloc(sizeof(sem_t), 1);
 }
 
-int os_mutex_take(void *handle, uint32_t ms)
+int wos_mutex_take(void *handle, uint32_t ms)
 {
-    if (handle && os.state > OS_STATE_INITIALIZED)
+    if (handle && wos.state > WOS_STATE_INITIALIZED)
     {
-        uint32_t t = HAL_GetTick();
+        sem_t *h = (sem_t *)handle;
+        uint32_t begin = HAL_GetTick();
         do
         {
-            if (0 == ((sem_t *)handle)->val || ((sem_t *)handle)->owner == os_curr_task)
+            if (0 == h->value)
             {
                 __disable_irq();
-                ((sem_t *)handle)->val = (int)(((sem_t *)handle)->owner = (void *)os_curr_task);
+                h->value = (int)(h->owner = (void *)wos_curr_task);
                 __enable_irq();
-                return 0;
+                return 0; // ok
             }
             HAL_Delay(1);
-            os_yield();
-        } while (HAL_GetTick() - t < ms);
+            wos_yield();
+        } while (HAL_GetTick() - begin < ms);
     }
-    return -1;
+    return -1; // error
 }
 
-int os_mutex_give(void *handle)
+int wos_mutex_give(void *handle)
 {
-    if (handle && os.state > OS_STATE_INITIALIZED)
+    if (handle && wos.state > WOS_STATE_INITIALIZED)
     {
-        if (((sem_t *)handle)->val)
+        sem_t *h = (sem_t *)handle;
+        if (h->value)
         {
-            if (((sem_t *)handle)->owner == os_curr_task)
+            if ((h->owner == wos_curr_task) && (h->owner == h->value))
             {
                 __disable_irq();
                 memset(handle, 0, sizeof(sem_t));
                 __enable_irq();
-                return 0;
+                EXC_RETURN_HANDLER_FPU 0;
             }
         }
     }

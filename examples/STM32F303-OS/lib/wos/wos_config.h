@@ -1,16 +1,18 @@
-#ifndef OS_CONFIG_H
-#define OS_CONFIG_H
+#ifndef WOS_CONFIG_H
+#define WOS_CONFIG_H
+
 // clang-format off
 
 #include "stm32f3xx_hal.h"
 
-// #define OS_CONFIG_PREEMPTION
+// #define WOS_CONFIG_PREEMPTION
 
-// #define OS_CONFIG_SWITCH_TIME        (10) /* ms, default = systick */
+// #define WOS_CONFIG_SWITCH_TIME        (10) /* ms, default = systick */
 
-#define OS_CONFIG_MINIMAL_STACK_SIZE    (128) /* Words */
+#define WOS_CONFIG_MINIMAL_STACK_SIZE   (128) /* Words */
 
-#define OS_CONFIG_TIMERS
+#define WOS_CONFIG_TIMERS
 
 // clang-format on
-#endif /* OS_CONFIG_H */
+
+#endif /* WOS_CONFIG_H */
