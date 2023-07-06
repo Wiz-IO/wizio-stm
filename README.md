@@ -25,15 +25,7 @@ _( The project is a work in progress, there may be bugs... please, report )_
 ![stm](https://raw.githubusercontent.com/Wiz-IO/LIB/master/STM/STM32CubeMX-PlatformIO.png)
 
 ## SUPPORT
-* STM32L051K8U3 
-* STM32L431RBT6
-* STM32L431RCY6TR
-* STM32F100RBT6B
-* STM32F100R8T6B
-* STM32F303VCT6
-* STM32C031C6Tx
-* STM32G031K8Tx
-* STM32G431C8Tx
+* [ *MCU* ( Boards )](https://github.com/Wiz-IO/wizio-stm/tree/main/boards)
 * **STM32VIRTUAL Board - for ALL chips from this list**  ( [Read WIKI - The STM32VIRTUAL Board](https://github.com/Wiz-IO/wizio-stm/wiki/The-STM32VIRTUAL--Board) )
 * * STM32L0x
 * * STM32L1x
