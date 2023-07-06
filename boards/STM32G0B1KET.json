@@ -1,0 +1,36 @@
+{
+  "name":         "STM32G0B1KET",
+  "url":          "https://github.com/Wiz-IO/wizio-stm",
+  "vendor":       "WizIO",
+
+  "frameworks":   [ "WizIO-STM32-SDK" ],
+
+  "build": {
+    "div"               : "STM32G0",
+    "sub"               : "%B1xx",
+    "mcu"               : "%B1KETx",
+    "cor"               : [ "-mcpu=cortex-m0plus", "-mthumb" ],
+
+    "f_cpu"             : "64000000L"
+  },
+
+  "debug": {
+    "default_tools": [
+      "stlink"
+    ],
+    "jlink_device"    : "STM32G0B1KET",
+    "onboard_tools"   : [ "stlink" ],
+    "openocd_target"  : "stm32g0x",
+    "svd_path"        : "STM32G0B1.svd"
+  },
+
+  "upload": {
+    "maximum_ram_size"  : 147456,
+    "maximum_size"      : 524288,
+    "protocol"  : "stlink",
+    "protocols" : [
+      "jlink",
+      "stlink"
+    ]
+  }
+}
