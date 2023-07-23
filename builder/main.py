@@ -44,7 +44,9 @@ def CreateProjectMX(*args, **kwargs): CreateProject(env)
 env.AddCustomTarget( "create_project", None, CreateProjectMX, title="CREATE Project", description="TODO Create simple project" )
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
-env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['PLATFORM_MANIFEST'] )
+
+p = dirname( env['BUILD_SCRIPT']).replace('builder', '')
+env['PLATFORM_DIR' ] = env.platform_dir  = dirname(p) # dirname( env['PLATFORM_MANIFEST'] )
 env['FRAMEWORK_DIR'] = env.framework_dir = env.PioPlatform().get_package_dir( FRAMEWORK_NAME )
 env.Replace( 
     BUILD_DIR = env.subst('$BUILD_DIR'),
