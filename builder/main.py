@@ -45,8 +45,7 @@ env.AddCustomTarget( "create_project", None, CreateProjectMX, title="CREATE Proj
 
 print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
 
-p = dirname( env['BUILD_SCRIPT']).replace('builder', '')
-env['PLATFORM_DIR' ] = env.platform_dir  = dirname(p) # dirname( env['PLATFORM_MANIFEST'] )
+env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['BUILD_SCRIPT']).replace('builder', '') # dirname( env['PLATFORM_MANIFEST'] )
 env['FRAMEWORK_DIR'] = env.framework_dir = env.PioPlatform().get_package_dir( FRAMEWORK_NAME )
 env.Replace( 
     BUILD_DIR = env.subst('$BUILD_DIR'),
