@@ -23,8 +23,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
 import sys, os
-from os import listdir
-from os.path import join, dirname
+from os.path import join
 from SCons.Script import (ARGUMENTS, AlwaysBuild, Default, DefaultEnvironment)
 from cube import ImportCube
 from tmp import CreateProject
@@ -43,9 +42,9 @@ if os.name == 'nt':
 def CreateProjectMX(*args, **kwargs): CreateProject(env)
 env.AddCustomTarget( "create_project", None, CreateProjectMX, title="CREATE Project", description="TODO Create simple project" )
 
-print( '\n<<< STM32 EXPERIMENTAL PLATFORM(IO) 2023 Georgi Angelov >>>\n' )
+print( '\n<<< STM32 PLATFORM( IO ) WizIO 2023 Georgi Angelov >>>\n' )
 
-env['PLATFORM_DIR' ] = env.platform_dir  = dirname( env['BUILD_SCRIPT']).replace('builder', '') # dirname( env['PLATFORM_MANIFEST'] )
+env['PLATFORM_DIR' ] = env.platform_dir  = env.PioPlatform().get_dir()
 env['FRAMEWORK_DIR'] = env.framework_dir = env.PioPlatform().get_package_dir( FRAMEWORK_NAME )
 env.Replace( 
     BUILD_DIR = env.subst('$BUILD_DIR'),

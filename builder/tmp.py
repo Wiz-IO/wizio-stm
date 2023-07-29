@@ -22,11 +22,10 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-import sys, os, time
+import time
 from os import listdir
-from os.path import join, exists, normpath, dirname, basename
+from os.path import join, exists
 from shutil import copyfile
-from platformio import proc, fs
 from colorama import Fore
 
 def ERROR(s):
